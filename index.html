@@ -2,33 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>سوق التشخيص</title>
+    <title>رحلة المشخّص</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- شاشة البداية -->
     <div id="start-screen" class="screen active">
-        <h1>سوق التشخيص</h1>
-        <p>لديك ميزانية محدودة. اشترِ المعلومات اللازمة باستخدام الأدوات للوصول إلى التشخيص الصحيح بأقل تكلفة. خطأ واحد يعني الخسارة الكاملة.</p>
-        <button id="start-button">ابدأ اللعبة</button>
+        <h1>رحلة المشخّص</h1>
+        <p>أنت في رحلة من 15 حالة سريرية. لديك ميزانية محدودة، فاستخدمها بحكمة. خطأ واحد يعني الخسارة الكاملة.</p>
+        <button id="start-button">ابدأ الرحلة</button>
     </div>
 
     <!-- شاشة اللعب الرئيسية -->
     <div id="game-screen" class="screen">
-        <div id="hud"> <!-- Head-Up Display -->
-            <div id="score-container">النتيجة الإجمالية: <span id="total-score">0</span></div>
-            <div id="budget-container">الميزانية الحالية: <span id="budget">100</span></div>
+        <div id="hud">
+            <div id="progress-container">السؤال: <span id="progress">1/15</span></div>
+            <div id="budget-container">الميزانية: <span id="budget">200</span></div>
         </div>
         <div id="case-description"></div>
-        <div id="info-board">
-            <!-- بطاقات المعلومات ستظهر هنا -->
-        </div>
+        <div id="info-board"></div>
         <div id="toolkit">
-            <div class="tool" data-tool="hand">🖐️<span class="cost">-10</span></div>
-            <div class="tool" data-tool="stethoscope">🩺<span class="cost">-10</span></div>
-            <div class="tool" data-tool="magnifier">🔍<span class="cost">-10</span></div>
-            <div class="tool" data-tool="hammer">🔨<span class="cost">-10</span></div>
-            <div class="tool" data-tool="pen">🖊️<span class="cost">-10</span></div>
+            <div class="tool" data-tool="pen">🖊️<span class="tool-name">القصة</span><span class="cost">-10</span></div>
+            <div class="tool" data-tool="magnifier">🔍<span class="tool-name">التأمل</span><span class="cost">-10</span></div>
+            <div class="tool" data-tool="hand">🖐️<span class="tool-name">الجس</span><span class="cost">-10</span></div>
+            <div class="tool" data-tool="stethoscope">🩺<span class="tool-name">الإصغاء</span><span class="cost">-10</span></div>
+            <div class="tool" data-tool="hammer">🔨<span class="tool-name">المنعكسات</span><span class="cost">-10</span></div>
         </div>
         <button id="diagnose-button">✅ تشخيص نهائي</button>
     </div>
@@ -49,4 +47,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
