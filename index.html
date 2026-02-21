@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سوق التشخيص</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- شاشة البداية -->
+    <div id="start-screen" class="screen active">
+        <h1>سوق التشخيص</h1>
+        <p>لديك ميزانية محدودة. اشترِ المعلومات اللازمة باستخدام الأدوات للوصول إلى التشخيص الصحيح بأقل تكلفة. خطأ واحد يعني الخسارة الكاملة.</p>
+        <button id="start-button">ابدأ اللعبة</button>
+    </div>
+
+    <!-- شاشة اللعب الرئيسية -->
+    <div id="game-screen" class="screen">
+        <div id="hud"> <!-- Head-Up Display -->
+            <div id="score-container">النتيجة الإجمالية: <span id="total-score">0</span></div>
+            <div id="budget-container">الميزانية الحالية: <span id="budget">100</span></div>
+        </div>
+        <div id="case-description"></div>
+        <div id="info-board">
+            <!-- بطاقات المعلومات ستظهر هنا -->
+        </div>
+        <div id="toolkit">
+            <div class="tool" data-tool="hand">🖐️<span class="cost">-10</span></div>
+            <div class="tool" data-tool="stethoscope">🩺<span class="cost">-10</span></div>
+            <div class="tool" data-tool="magnifier">🔍<span class="cost">-10</span></div>
+            <div class="tool" data-tool="hammer">🔨<span class="cost">-10</span></div>
+            <div class="tool" data-tool="pen">🖊️<span class="cost">-10</span></div>
+        </div>
+        <button id="diagnose-button">✅ تشخيص نهائي</button>
+    </div>
+
+    <!-- شاشة التشخيص (الخيارات) -->
+    <div id="diagnosis-screen" class="screen">
+        <h2>ما هو تشخيصك النهائي؟</h2>
+        <div id="choices-container"></div>
+    </div>
+
+    <!-- شاشة الخسارة/الفوز -->
+    <div id="game-over-screen" class="screen">
+        <h1 id="game-over-title"></h1>
+        <p id="game-over-reason"></p>
+        <button id="restart-button">إعادة اللعب</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
