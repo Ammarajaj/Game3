@@ -2,7 +2,7 @@
 //                                 القسم الأول: كل المتغيرات
 // =================================================================================
 
-// 1. بنوك الأسئلة (84 سؤالاً كاملاً)
+// 1. بنوك الأسئلة (تبقى كما هي)
 const trainingBank = {
     'قلبية': [
         { level: 'easy', case: 'مريض 60 عاماً، يعاني من ألم صدري ضاغط خلف القص.', tools: { ecg: 'ارتفاع وصلة ST في المساري السفلية.' }, choices: ['احتشاء عضلة قلبية سفلي', 'التهاب التامور', 'تسلخ الأبهر', 'قرحة هضمية'], answer: 'احتشاء عضلة قلبية سفلي' },
@@ -45,7 +45,6 @@ const trainingBank = {
         { level: 'hard', case: 'شابة 22 عاماً، تشكو من حمى، ألم مفاصل، وطفح جلدي على الوجه يأخذ شكل "الفراشة" بعد التعرض للشمس.', tools: { labs: 'إيجابية أضداد النواة (ANA) و Anti-dsDNA.', history: 'تشكو أيضاً من تقرحات فموية غير مؤلمة.' }, choices: ['ذئبة حمامية جهازية (SLE)', 'التهاب جلد وعضل', 'وردية الوجه', 'حساسية ضوئية دوائية'], answer: 'ذئبة حمامية جهازية (SLE)' }
     ]
 };
-
 const challengeBank = {
     easy: [
         { id: 'C-EASY-1', level: 'easy', case: 'مريض أتى بألم وحرقة خلف القص يزداد بالانحناء ليلاً.', tools: { history: 'يتحسن بمضادات الحموضة.' }, choices: ['القلس المعدي المريئي (GERD)', 'احتشاء عضلة قلبية', 'تشنج مريء', 'قرحة هضمية'], answer: 'القلس المعدي المريئي (GERD)' },
@@ -82,18 +81,17 @@ const screens = {
     win: document.getElementById('win-screen'),
     stats: document.getElementById('stats-screen'),
 };
-
 const buttons = {
     startGame: document.getElementById('start-game-btn'),
     trainingMode: document.getElementById('training-mode-btn'),
     grandRound: document.getElementById('grand-round-btn'),
+    diagnose: document.getElementById('diagnose-btn'),
     restartGrandRound: document.getElementById('restart-grand-round-btn'),
     backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
     backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
     showStats: document.getElementById('stats-btn-main'),
     backToMainMenuStats: document.getElementById('back-to-main-menu-stats'),
 };
-
 const gameElements = {
     budgetDisplay: document.getElementById('budget-display'),
     questionCounter: document.getElementById('question-counter'),
@@ -103,14 +101,12 @@ const gameElements = {
     patientFileContent: document.getElementById('file-content'),
     choicesContainer: document.getElementById('choices-container'),
 };
-
 const statsElements = {
     bestPercentage: document.getElementById('best-percentage'),
     totalAttempts: document.getElementById('total-attempts-stats'),
     highestStage: document.getElementById('highest-stage'),
     recentHistory: document.getElementById('recent-history-list'),
 };
-
 const modal = {
     element: document.getElementById('modal'),
     title: document.getElementById('modal-title'),
@@ -119,7 +115,6 @@ const modal = {
 };
 
 // 3. متغيرات حالة اللعبة
-let currentScreen = 'start';
 let gameState = {};
 let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     bestPercentage: 0,
@@ -128,34 +123,40 @@ let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     recentHistory: []
 };
 let timerInterval;
-let grandRoundRulesShown = false; // متغير لتتبع عرض القواعد
+let grandRoundRulesShown = false;
 
 // =================================================================================
 //                                 القسم الثاني: كل الدوال
 // =================================================================================
 
-// --- وظائف التحكم بالواجهة ---
-function showScreen(screenName) {
-    if (screens && Object.values(screens).every(s => s)) {
-        Object.values(screens).forEach(screen => screen.classList.remove('active'));
+// --- وظائف التحكم بالواجهة (مع دعم زر الرجوع) ---
+function showScreen(screenName, isPoppingState = false) {
+    Object.values(screens).forEach(screen => screen.classList.remove('active'));
+    screens[screenName].classList.add('active');
+    
+    // **الإصلاح: استخدام History API**
+    if (!isPoppingState) {
+        history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
     }
-    if (screens && screens[screenName]) {
-        screens[screenName].classList.add('active');
-    }
-    currentScreen = screenName;
 }
 
-function showModal(title, text, autoCloseDelay = null) {
-    if (modal && modal.element) {
-        modal.title.innerHTML = title;
-        modal.text.innerHTML = text;
-        modal.element.style.display = 'flex';
+window.onpopstate = function(event) {
+    if (event.state && event.state.screen) {
+        showScreen(event.state.screen, true);
+    } else {
+        // حالة خاصة: إذا وصل المستخدم إلى بداية السجل، اعرض الشاشة الأولى
+        showScreen('start', true);
+    }
+};
 
-        if (autoCloseDelay) {
-            setTimeout(() => {
-                modal.element.style.display = 'none';
-            }, autoCloseDelay);
-        }
+function showModal(title, text, autoCloseDelay = null) {
+    modal.title.innerHTML = title;
+    modal.text.innerHTML = text;
+    modal.element.style.display = 'flex';
+    if (autoCloseDelay) {
+        setTimeout(() => {
+            modal.element.style.display = 'none';
+        }, autoCloseDelay);
     }
 }
 
@@ -176,7 +177,6 @@ function displayStats() {
     statsElements.bestPercentage.textContent = `${personalStats.bestPercentage}%`;
     statsElements.totalAttempts.textContent = personalStats.totalAttempts;
     statsElements.highestStage.textContent = personalStats.highestStage;
-
     statsElements.recentHistory.innerHTML = '';
     if (personalStats.recentHistory.length === 0) {
         statsElements.recentHistory.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
@@ -191,16 +191,12 @@ function displayStats() {
 }
 
 function startTrainingMode(specialty) {
-    // **الإصلاح: ترتيب الأسئلة حسب الصعوبة**
     const difficultyOrder = { 'easy': 1, 'medium': 2, 'hard': 3 };
-    const sortedQuestions = [...trainingBank[specialty]].sort((a, b) => {
-        return difficultyOrder[a.level] - difficultyOrder[b.level];
-    });
-
+    const sortedQuestions = [...trainingBank[specialty]].sort((a, b) => difficultyOrder[a.level] - difficultyOrder[b.level]);
     gameState = {
         mode: 'training',
         specialty: specialty,
-        questions: sortedQuestions, // استخدام الأسئلة المرتبة
+        questions: sortedQuestions,
         currentQuestionIndex: 0,
         budget: 150,
         usedToolsCount: 0,
@@ -212,30 +208,29 @@ function startTrainingMode(specialty) {
 }
 
 function startGrandRound() {
-    // **التحسين: عرض القواعد عند أول مرة فقط**
+    // **التحسين: الشرح المفصل للقواعد**
     if (!grandRoundRulesShown) {
         showModal(
-            '🏆 قواعد الجولة الكبرى',
-            `<ul>
-                <li><b>الهدف:</b> حل 15 حالة متتالية.</li>
-                <li><b>الميزانية:</b> تبدأ بـ 200 نقطة.</li>
-                <li><b>الوقت:</b> لديك 15 دقيقة فقط.</li>
-                <li><b>الخطر:</b> أي إجابة خاطئة تنهي الجولة فوراً!</li>
-                <li><b>التقييم:</b> سيتم تقييمك بنسبة مئوية بناءً على نتيجتك.</li>
+            '<h3>🏆 قواعد الجولة الكبرى: دليل المشخص المحترف</h3>',
+            `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ. هدفك هو إثبات أنك تملك المعرفة والحدس السريري لتجاوز 15 حالة متتالية.</p>
+            <ul>
+                <li><b>🧠 الهدف الأساسي:</b> حل 15 حالة سريرية يتم اختيارها عشوائياً، وتتدرج في الصعوبة.</li>
+                <li><b>💰 الميزانية الأولية:</b> تبدأ رحلتك بـ <b>200 نقطة</b>. إدارتها بحكمة هي مفتاح النجاح.</li>
+                <li><b>⏳ عداد الوقت:</b> لديك <b>15 دقيقة فقط</b> لإكمال الجولة. إذا انتهى الوقت، تنتهي الجولة.</li>
+                <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
+                <li><b>📈 نظام التقييم:</b> عند انتهاء الجولة، سيتم حساب <b>نسبة أداء مئوية</b> تأخذ بعين الاعتبار النقاط المتبقية والمرحلة التي وصلت إليها.</li>
             </ul>
-            <p><b>هل أنت مستعد للتحدي؟</b></p>`
+            <p><b>نصيحة استراتيجية:</b> لا تستخدم كل الأدوات في الحالات السهلة. وفر ميزانيتك للحالات المعقدة.</p>
+            <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`
         );
         grandRoundRulesShown = true;
-        return; // توقف هنا، سيبدأ اللاعب اللعبة بالضغط على الزر مرة أخرى
+        return;
     }
-
     personalStats.totalAttempts++;
     saveStats();
-
     const easyQuestions = shuffleArray([...challengeBank.easy]).slice(0, 5);
     const mediumQuestions = shuffleArray([...challengeBank.medium]).slice(0, 5);
     const hardQuestions = shuffleArray([...challengeBank.hard]).slice(0, 5);
-
     gameState = {
         mode: 'grand_round',
         questions: [...easyQuestions, ...mediumQuestions, ...hardQuestions],
@@ -243,7 +238,6 @@ function startGrandRound() {
         budget: 200,
         usedToolsCount: 0,
     };
-    
     startTimer(15 * 60, gameElements.timerDisplay);
     setupQuestion();
     showScreen('game');
@@ -260,6 +254,8 @@ function setupSpecialtySelection() {
         grid.appendChild(button);
     });
 }
+
+// ... بداية الكود من الرد السابق ...
 
 function startTimer(duration, display) {
     let timer = duration, minutes, seconds;
@@ -282,17 +278,29 @@ function startTimer(duration, display) {
 
 // --- وظائف منطق اللعبة الفعلي ---
 function setupQuestion() {
+    // **الإصلاح: إخفاء الخيارات في البداية**
+    gameElements.choicesContainer.innerHTML = '<p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>';
+    document.getElementById('diagnose-btn').classList.remove('used');
+
     gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
-    document.querySelectorAll('.tool, .assist-tool').forEach(t => {
+    document.querySelectorAll('.tool-item').forEach(t => {
         t.classList.remove('used');
-        t.disabled = false;
     });
+    
     const question = gameState.questions[gameState.currentQuestionIndex];
     gameElements.budgetDisplay.textContent = gameState.budget;
     gameElements.questionCounter.textContent = `${gameState.currentQuestionIndex + 1} / ${gameState.questions.length}`;
     gameElements.caseTitle.textContent = `الحالة رقم #${gameState.currentQuestionIndex + 1} (صعوبة: ${question.level || 'غير محدد'})`;
     gameElements.caseDescription.textContent = question.case;
-    gameElements.choicesContainer.innerHTML = '';
+}
+
+// **دالة جديدة لإظهار الخيارات**
+function showChoices() {
+    const btn = document.getElementById('diagnose-btn');
+    if (btn.classList.contains('used')) return; // لا تفعل شيئاً إذا تم الضغط عليه بالفعل
+
+    const question = gameState.questions[gameState.currentQuestionIndex];
+    gameElements.choicesContainer.innerHTML = ''; // إفراغ الحاوية
     const shuffledChoices = shuffleArray([...question.choices]);
     shuffledChoices.forEach(choice => {
         const button = document.createElement('button');
@@ -301,14 +309,15 @@ function setupQuestion() {
         button.onclick = () => checkAnswer(choice);
         gameElements.choicesContainer.appendChild(button);
     });
+    btn.classList.add('used'); // تمييز الزر على أنه مستخدم
 }
-
-// ... بداية الكود من الرد السابق ...
 
 function useTool(toolElement) {
     if (toolElement.classList.contains('used')) return;
+    
     const toolName = toolElement.dataset.tool;
-    const cost = parseInt(toolElement.dataset.cost);
+    const cost = parseInt(toolElement.querySelector('.tool-cost').textContent);
+
     if (gameState.budget < cost) {
         showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
         return;
@@ -316,41 +325,51 @@ function useTool(toolElement) {
     updateBudget(-cost);
     gameState.usedToolsCount++;
     toolElement.classList.add('used');
-    toolElement.disabled = true;
+    
     const question = gameState.questions[gameState.currentQuestionIndex];
     if (gameState.mode === 'grand_round' && question.dangerousTool === toolName) {
-        loseGame(`لقد استخدمت أداة خطرة (${toolElement.innerText}) في هذا السياق، مما أدى إلى تدهور حاد في حالة المريض.`);
+        loseGame(`لقد استخدمت أداة خطرة (${toolElement.querySelector('.tool-name').textContent}) في هذا السياق، مما أدى إلى تدهور حاد في حالة المريض.`);
         return;
     }
+    
     const info = question.tools[toolName];
     if (info) {
-        addInfoToPatientFile(info, toolElement.innerText);
+        addInfoToPatientFile(info, toolElement.querySelector('.tool-name').textContent);
     } else {
-        addInfoToPatientFile('لا توجد معلومات مفيدة من هذه الأداة لهذه الحالة.', toolElement.innerText);
+        addInfoToPatientFile('لا توجد معلومات مفيدة من هذه الأداة لهذه الحالة.', toolElement.querySelector('.tool-name').textContent);
     }
 }
 
 function useAssistTool(toolElement) {
     if (toolElement.classList.contains('used')) return;
-    const cost = parseInt(toolElement.dataset.cost);
+
+    const toolName = toolElement.dataset.tool;
+    const cost = parseInt(toolElement.querySelector('.tool-cost').textContent);
+
     if (gameState.budget < cost) {
         showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
         return;
     }
     updateBudget(-cost);
     toolElement.classList.add('used');
-    toolElement.disabled = true;
+    
     const question = gameState.questions[gameState.currentQuestionIndex];
-    if (toolElement.id === 'consultation-tool') {
-        let wrongChoices = question.choices.filter(c => c !== question.answer);
-        wrongChoices = shuffleArray(wrongChoices).slice(0, 2);
-        document.querySelectorAll('.choice-btn').forEach(btn => {
-            if (wrongChoices.includes(btn.textContent)) {
-                btn.style.display = 'none';
-            }
-        });
-        showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
-    } else if (toolElement.id === 'brainstorm-tool') {
+    if (toolName === 'consultation') {
+        // تأكد من أن الخيارات ظاهرة قبل محاولة إخفائها
+        if (gameElements.choicesContainer.querySelector('.choice-btn')) {
+            let wrongChoices = question.choices.filter(c => c !== question.answer);
+            wrongChoices = shuffleArray(wrongChoices).slice(0, 2);
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                if (wrongChoices.includes(btn.textContent)) {
+                    btn.style.display = 'none';
+                }
+            });
+            showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
+        } else {
+            showModal('💡 مساعدة (50/50)', `يجب أن تكون في "وضع التشخيص" أولاً لاستخدام هذه المساعدة. لقد تم خصم النقاط، وستعمل المساعدة بمجرد إظهار الخيارات.`);
+            gameState.consultationUsedEarly = true; // علامة لاستخدامها لاحقاً
+        }
+    } else if (toolName === 'brainstorm') {
         const choicesList = question.choices.map(c => `<li>${c}</li>`).join('');
         showModal('🧠 عصف ذهني', `التشخيصات التفريقية المحتملة لهذه الحالة هي:<ul>${choicesList}</ul>`);
     }
@@ -384,13 +403,11 @@ function checkAnswer(selectedAnswer) {
             question.answer = question.nextStep.answer;
             setTimeout(setupQuestion, 2000);
         } else {
-            // **التحسين: إغلاق تلقائي للنافذة**
             showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`, 1500);
             setTimeout(nextQuestion, 1500);
         }
     } else {
         if (gameState.mode === 'grand_round') {
-            // **التحسين: عدم إظهار الإجابة الصحيحة**
             loseGame(`إجابة خاطئة. انتهت الجولة.`);
         } else {
             const penalty = 25;
@@ -404,6 +421,7 @@ function checkAnswer(selectedAnswer) {
 function nextQuestion() {
     gameState.currentQuestionIndex++;
     delete gameState.nextStepCompleted;
+    delete gameState.consultationUsedEarly;
     if (gameState.currentQuestionIndex >= gameState.questions.length) {
         if (gameState.mode === 'grand_round') {
             winGame();
@@ -468,8 +486,9 @@ function setupEventListeners() {
         showScreen('specialtySelection');
     };
     buttons.grandRound.onclick = startGrandRound;
+    buttons.diagnose.onclick = showChoices;
     buttons.restartGrandRound.onclick = () => {
-        grandRoundRulesShown = false; // إعادة السماح بظهور القواعد
+        grandRoundRulesShown = false;
         startGrandRound();
     };
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
@@ -477,11 +496,13 @@ function setupEventListeners() {
     buttons.showStats.onclick = displayStats;
     buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
-    document.querySelectorAll('.tool').forEach(tool => {
-        tool.onclick = () => useTool(tool);
-    });
-    document.querySelectorAll('.assist-tool').forEach(tool => {
-        tool.onclick = () => useAssistTool(tool);
+    document.querySelectorAll('.tool-item:not(.diagnose-btn)').forEach(tool => {
+        if (tool.classList.contains('assist-tool')) {
+            tool.onclick = () => useAssistTool(tool);
+
+        } else {
+            tool.onclick = () => useTool(tool);
+        }
     });
     
     modal.closeBtn.onclick = () => modal.element.style.display = 'none';
@@ -494,9 +515,19 @@ function setupEventListeners() {
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        // إذا كان هناك حالة في السجل (مثل تحديث الصفحة)، اذهب إليها
+        if (history.state && history.state.screen) {
+            showScreen(history.state.screen, true);
+        } else {
+            showScreen('start');
+        }
         setupEventListeners();
-        showScreen('start');
-        showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
+        
+        // لا تظهر النافذة الترحيبية عند تحديث الصفحة
+        if (!history.state) {
+            showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
+        }
+
     } catch (error) {
         const modalContent = document.querySelector('.modal-content');
         if (modalContent) {
@@ -516,3 +547,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- نهاية الملف ---
+
