@@ -392,8 +392,7 @@ reserve: {
             choices: ['البوالة التفهة مركزية المنشأ (Central Diabetes Insipidus)', 'البوالة التفهة كلوية المنشأ', 'العطاش نفسي المنشأ', 'سكري غير مضبوط'], answer: 'البوالة التفهة مركزية المنشأ (Central Diabetes Insipidus)'
         },
         {
-            id: 'RES-H-10', level: 'hard', case: 'مريض يعاني من ألم بطني، اعتلال أعصاب محيطي (تدلي القدم)، وفقر دم انحلالي. الفحص يظهر خطاً أزرق على حافة اللثة.',
-            tools: {
+            id: 'RES-H-10', level: 'hard', case: 'مريض يعاني من ألم بطني، اعتلال أعصاب محيطي (تدلي القدم)، وفقر دم انحلالي. الفحص يظهر خطاً أزرق على حافة اللثة.',            tools: {
                 taammul: 'وجود "خط بورتون" (Burton\'s line) على اللثة.',
                 tahmeel: 'فقر دم مع وجود "تنقط أساسي" (basophilic stippling) في الكريات الحمر.',
                 munakkisat: 'ضعف في العضلات الباسطة للرسغ والقدم (wrist/foot drop).'
@@ -412,6 +411,11 @@ reserve: {
 
 // ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` الجديدة هنا
 
+// =================================================================================
+//                                 القسم الأول: كل المتغيرات
+// =================================================================================
+
+// ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` الجديدة هنا
 // =================================================================================
 //                                 القسم الأول: كل المتغيرات
 // =================================================================================
@@ -516,6 +520,9 @@ function showModal(title, text, showConfirmButtons = false, onConfirm = null) {
     modal.title.innerHTML = title;
     modal.text.innerHTML = text;
     modal.element.style.display = 'flex';
+
+    // **الإصلاح النهائي لزر الإلغاء**
+    modal.cancelBtn.onclick = () => modal.element.style.display = 'none';
 
     if (showConfirmButtons) {
         modal.confirmBtn.style.display = 'inline-block';
@@ -638,7 +645,10 @@ function startTimer(duration, display) {
 // --- وظائف منطق اللعبة الفعلي ---
 function setupQuestion() {
     gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
-    document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('used'));
+    document.querySelectorAll('.tool-item').forEach(t => {
+        t.classList.remove('used');
+        t.style.display = ''; // إعادة إظهار كل الأزرار
+    });
     
     const question = gameState.questions[gameState.currentQuestionIndex];
     
@@ -813,12 +823,6 @@ function updateStatsOnFinish(isWin) {
 //                                القسم الثالث: نقطة الانطلاق
 // =================================================================================
 
-// ... (الكود من الرد السابق) ...
-
-// =================================================================================
-//                                القسم الثالث: نقطة الانطلاق
-// =================================================================================
-
 function setupEventListeners() {
     buttons.startGame.onclick = () => showScreen('modeSelection');
     buttons.trainingMode.onclick = setupSpecialtySelection;
@@ -833,8 +837,8 @@ function setupEventListeners() {
                 <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
             </ul>
             <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`,
-            true, // إظهار أزرار التأكيد والإلغاء
-            startGrandRound // الدالة التي ستُنفذ عند الضغط على "تأكيد"
+            true,
+            startGrandRound
         );
     };
     buttons.skipQuestion.onclick = skipQuestion;
@@ -846,7 +850,6 @@ function setupEventListeners() {
     buttons.showStats.onclick = displayStats;
     buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
-    // ربط الأدوات بوظائفها
     document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
         if (tool.dataset.tool === 'consultation') {
             tool.onclick = () => useAssistTool(tool);
@@ -857,7 +860,6 @@ function setupEventListeners() {
     
     // **الإصلاح النهائي لأزرار إغلاق النافذة**
     modal.closeBtn.onclick = () => modal.element.style.display = 'none';
-    modal.cancelBtn.onclick = () => modal.element.style.display = 'none';
     window.onclick = (event) => {
         if (event.target == modal.element) {
             modal.element.style.display = 'none';
@@ -866,13 +868,12 @@ function setupEventListeners() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // التعامل مع تحميل الصفحة لأول مرة أو عند التحديث باستخدام الهاش
     const initialScreen = location.hash ? location.hash.substring(1) : 'start';
-    // التأكد من أن الرابط صحيح قبل استخدامه
     if (screens[initialScreen]) {
-        showScreen(initialScreen, true); // true لمنع دفع حالة جديدة للسجل
+        showScreen(initialScreen, true);
     } else {
         showScreen('start', true);
     }
     setupEventListeners();
 });
+            
