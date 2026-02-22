@@ -128,6 +128,7 @@ let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     recentHistory: []
 };
 let timerInterval;
+let grandRoundRulesShown = false; // متغير لتتبع عرض القواعد
 
 // =================================================================================
 //                                 القسم الثاني: كل الدوال
@@ -144,11 +145,17 @@ function showScreen(screenName) {
     currentScreen = screenName;
 }
 
-function showModal(title, text) {
+function showModal(title, text, autoCloseDelay = null) {
     if (modal && modal.element) {
         modal.title.innerHTML = title;
         modal.text.innerHTML = text;
         modal.element.style.display = 'flex';
+
+        if (autoCloseDelay) {
+            setTimeout(() => {
+                modal.element.style.display = 'none';
+            }, autoCloseDelay);
+        }
     }
 }
 
@@ -184,10 +191,16 @@ function displayStats() {
 }
 
 function startTrainingMode(specialty) {
+    // **الإصلاح: ترتيب الأسئلة حسب الصعوبة**
+    const difficultyOrder = { 'easy': 1, 'medium': 2, 'hard': 3 };
+    const sortedQuestions = [...trainingBank[specialty]].sort((a, b) => {
+        return difficultyOrder[a.level] - difficultyOrder[b.level];
+    });
+
     gameState = {
         mode: 'training',
         specialty: specialty,
-        questions: shuffleArray([...trainingBank[specialty]]),
+        questions: sortedQuestions, // استخدام الأسئلة المرتبة
         currentQuestionIndex: 0,
         budget: 150,
         usedToolsCount: 0,
@@ -199,6 +212,23 @@ function startTrainingMode(specialty) {
 }
 
 function startGrandRound() {
+    // **التحسين: عرض القواعد عند أول مرة فقط**
+    if (!grandRoundRulesShown) {
+        showModal(
+            '🏆 قواعد الجولة الكبرى',
+            `<ul>
+                <li><b>الهدف:</b> حل 15 حالة متتالية.</li>
+                <li><b>الميزانية:</b> تبدأ بـ 200 نقطة.</li>
+                <li><b>الوقت:</b> لديك 15 دقيقة فقط.</li>
+                <li><b>الخطر:</b> أي إجابة خاطئة تنهي الجولة فوراً!</li>
+                <li><b>التقييم:</b> سيتم تقييمك بنسبة مئوية بناءً على نتيجتك.</li>
+            </ul>
+            <p><b>هل أنت مستعد للتحدي؟</b></p>`
+        );
+        grandRoundRulesShown = true;
+        return; // توقف هنا، سيبدأ اللاعب اللعبة بالضغط على الزر مرة أخرى
+    }
+
     personalStats.totalAttempts++;
     saveStats();
 
@@ -289,7 +319,7 @@ function useTool(toolElement) {
     toolElement.disabled = true;
     const question = gameState.questions[gameState.currentQuestionIndex];
     if (gameState.mode === 'grand_round' && question.dangerousTool === toolName) {
-        loseGame(`لقد استخدمت أداة خطرة (${toolElement.innerText}) في هذا السياق، مما أدى إلى تدهور حاد في حالة المريض. التشخيص الصحيح كان: ${question.answer}`);
+        loseGame(`لقد استخدمت أداة خطرة (${toolElement.innerText}) في هذا السياق، مما أدى إلى تدهور حاد في حالة المريض.`);
         return;
     }
     const info = question.tools[toolName];
@@ -347,24 +377,26 @@ function checkAnswer(selectedAnswer) {
         const reward = 15;
         updateBudget(reward);
         if (question.nextStep && !gameState.nextStepCompleted) {
-            showModal('تشخيص أولي صحيح!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة. لكن هذه الحالة معقدة وتتطلب قراراً إضافياً.`);
+            showModal('تشخيص أولي صحيح!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة. <br> لكن هذه الحالة معقدة وتتطلب قراراً إضافياً.`, 2000);
             gameState.nextStepCompleted = true;
             question.case = question.nextStep.question;
             question.choices = question.nextStep.choices;
             question.answer = question.nextStep.answer;
             setTimeout(setupQuestion, 2000);
         } else {
-            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
+            // **التحسين: إغلاق تلقائي للنافذة**
+            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`, 1500);
             setTimeout(nextQuestion, 1500);
         }
     } else {
         if (gameState.mode === 'grand_round') {
-            loseGame(`إجابة خاطئة. التشخيص الصحيح كان: ${question.answer}`);
+            // **التحسين: عدم إظهار الإجابة الصحيحة**
+            loseGame(`إجابة خاطئة. انتهت الجولة.`);
         } else {
             const penalty = 25;
             updateBudget(-penalty);
             showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة كعقوبة. تعلم من الخطأ وانتقل للحالة التالية.`);
-            setTimeout(nextQuestion, 2500);
+            setTimeout(nextQuestion, 3000);
         }
     }
 }
@@ -377,7 +409,7 @@ function nextQuestion() {
             winGame();
         } else {
             showModal('التدريب انتهى!', `لقد أكملت مناوبة <b>${gameState.specialty}</b> بنجاح. نتيجتك التدريبية هي ${gameState.budget} نقطة.`);
-            showScreen('modeSelection');
+            setTimeout(() => showScreen('modeSelection'), 2000);
         }
     } else {
         setupQuestion();
@@ -429,7 +461,6 @@ function updateStatsOnFinish(isWin) {
 //                                القسم الثالث: نقطة الانطلاق
 // =================================================================================
 
-// --- دالة ربط الأزرار (معرفة مرة واحدة فقط) ---
 function setupEventListeners() {
     buttons.startGame.onclick = () => showScreen('modeSelection');
     buttons.trainingMode.onclick = () => {
@@ -437,7 +468,10 @@ function setupEventListeners() {
         showScreen('specialtySelection');
     };
     buttons.grandRound.onclick = startGrandRound;
-    buttons.restartGrandRound.onclick = startGrandRound;
+    buttons.restartGrandRound.onclick = () => {
+        grandRoundRulesShown = false; // إعادة السماح بظهور القواعد
+        startGrandRound();
+    };
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
     buttons.showStats.onclick = displayStats;
@@ -458,20 +492,12 @@ function setupEventListeners() {
     };
 }
 
-// --- الكود الذي يتم تشغيله بعد تحميل الصفحة ---
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // 1. قم بربط جميع الأزرار بوظائفها أولاً
         setupEventListeners();
-        
-        // 2. اعرض الشاشة الابتدائية
         showScreen('start');
-        
-        // 3. اعرض الرسالة الترحيبية
         showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
-
     } catch (error) {
-        // كاشف الأخطاء القوي
         const modalContent = document.querySelector('.modal-content');
         if (modalContent) {
             modalContent.innerHTML = `
@@ -484,11 +510,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             document.getElementById('modal').style.display = 'flex';
         } else {
-            // في حال كانت النافذة نفسها لا تعمل
             alert(`Critical Error: ${error.name} - ${error.message}`);
         }
     }
 });
 
 // --- نهاية الملف ---
-                          
