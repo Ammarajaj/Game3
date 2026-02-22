@@ -857,7 +857,31 @@ function setupEventListeners() {
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
     
-    buttons.showStats.onclick = displayStats;
+    // --- بداية الكود التشخيصي لزر الإحصائيات ---
+
+// تأكد من أن العنصر موجود قبل ربط الحدث
+if (buttons.showStats) {
+    buttons.showStats.onclick = () => {
+        // سنعرض نافذة منبثقة بسيطة لتأكيد أن النقر يعمل
+        showModal(
+            'تشخيص الزر',
+            'تم النقر على زر الإحصائيات بنجاح! هذا يعني أن المشكلة ليست في الزر نفسه، بل قد تكون داخل دالة `displayStats`.',
+            false // لا نحتاج لأزرار تأكيد هنا
+        );
+        
+        // يمكنك محاولة استدعاء الدالة الأصلية من هنا أيضاً لرؤية ما إذا كان سيحدث خطأ
+        // displayStats(); 
+    };
+} else {
+    // إذا كان الزر غير موجود أصلاً، سنعرف ذلك فوراً
+    alert("خطأ فادح: لم يتم العثور على العنصر 'stats-btn-main' في ملف HTML. يرجى التحقق من الـ ID.");
+}
+
+// --- نهاية الكود التشخيصي ---
+
+// السطر القديم الذي سنقوم بتعليقه أو حذفه مؤقتاً
+// buttons.showStats.onclick = displayStats; 
+    
     buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
     document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
