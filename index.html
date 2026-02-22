@@ -38,7 +38,8 @@
                     <p>اختبر معرفتك في 15 حالة عشوائية. أي خطأ ينهي الجولة!</p>
                 </button>
             </div>
-            <button id="stats-btn-main" class="btn-tertiary">📊 عرض إحصائياتي</button>
+            <!-- ✅ الزر الجديد للإحصائيات مع ID واضح -->
+            <button id="show-stats-button" class="btn-tertiary">📊 عرض الإحصائيات</button>
         </div>
     </div>
 
@@ -182,29 +183,33 @@
         </div>
     </div>
 
-    <!-- شاشة الإحصائيات -->
-    <div id="stats-screen" class="screen">
+    <!-- ✅ شاشة الإحصائيات الجديدة بالكامل مع IDs واضحة -->
+    <div id="statistics-page" class="screen">
         <div class="container">
             <h2>📊 إحصائيات الأداء</h2>
+            
             <div class="stats-grid">
                 <div class="stat-card">
                     <h4>أفضل نسبة أداء</h4>
-                    <p id="best-percentage">0%</p>
+                    <p id="stats-best-percentage">0%</p>
                 </div>
                 <div class="stat-card">
                     <h4>إجمالي المحاولات</h4>
-                    <p id="total-attempts-stats">0</p>
+                    <p id="stats-total-attempts">0</p>
                 </div>
                 <div class="stat-card">
                     <h4>أعلى مرحلة تم الوصول إليها</h4>
-                    <p id="highest-stage">0 / 15</p>
+                    <p id="stats-highest-stage">0 / 15</p>
                 </div>
             </div>
+    
             <h3>سجل آخر 5 محاولات</h3>
-            <ul id="recent-history-list" class="history-list">
+            <ul id="stats-history-list" class="history-list">
                 <li>لا يوجد سجل محاولات بعد.</li>
             </ul>
-            <button id="back-to-main-menu-stats" class="btn-secondary">العودة</button>
+    
+            <!-- زر العودة بـ id جديد -->
+            <button id="stats-back-button" class="btn-secondary">العودة</button>
         </div>
     </div>
 
@@ -221,6 +226,7 @@
         </div>
     </div>
 
+    <!-- ✅ تأكد من أن هذا السطر هو آخر شيء قبل إغلاق body -->
     <script src="script.js"></script>
 
 </body>
