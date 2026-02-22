@@ -394,45 +394,116 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- نقطة الانطلاق وربط الأحداث ---
+        // --- نقطة الانطلاق وربط الأحداث ---
     function setupEventListeners() {
         buttons.startGame.onclick = () => showScreen('modeSelection');
         buttons.trainingMode.onclick = setupSpecialtySelection;
         buttons.grandRound.onclick = () => {
             showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`, true, startGrandRound);
         };
-        buttons.skipQuestion.onclick = skipQuestion;
         buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
         
-        showStatsButton.onclick = showStatistics;
-        statsBackButton.onclick = () => showScreen('modeSelection');
+        // ربط الأزرار الصحيحة من HTML
+        buttons.showStats.onclick = showStatistics;
+        buttons.backFromStats.onclick = () => window.history.back(); 
 
+        // ربط أدوات التشخيص والنافذة المنبثقة
         document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
-            tool.onclick = tool.dataset.tool === 'consultation' ? () => useAssistTool(tool) : () => useTool(tool);
+            if (tool.dataset.tool === 'consultation') {
+                tool.onclick = () => useAssistTool(tool);
+            } else {
+                tool.onclick = () => useTool(tool);
+            }
         });
-        
+        buttons.skipQuestion.onclick = skipQuestion; // ربط زر التخطي
         modal.closeBtn.onclick = () => modal.element.style.display = 'none';
         window.onclick = (event) => { if (event.target == modal.element) modal.element.style.display = 'none'; };
-    }
 
-    // =================================================================================
-    // ✨ تم تحديث دالة بدء التشغيل لتسجيل الحالة الأولية بشكل صحيح
-    // =================================================================================
+
+        // =================================================================================
+        // ✨✨✨  منطق برمجة زر المزاح يبدأ هنا  ✨✨✨
+        // =================================================================================
+        const prankBtn = document.getElementById('prank-btn');
+        const prankTexts = {
+            p1: document.getElementById('prank-text-1'),
+            p2: document.getElementById('prank-text-2'),
+            p3: document.getElementById('prank-text-3'),
+            p4: document.getElementById('prank-text-4'),
+            p5: document.getElementById('prank-text-5'),
+        };
+        let prankClickCount = 0;
+
+        prankBtn.addEventListener('click', () => {
+            prankClickCount++;
+
+            switch (prankClickCount) {
+                case 1:
+                    // الخطوة الأولى: انزل الزر واظهر النص الأول
+                    prankTexts.p1.textContent = 'دارس دورات وبدك تشخص حالات سريرية؟';
+                    prankBtn.style.top = '30px'; // انزل الزر للأسفل
+                    prankBtn.textContent = 'امزح معاك اضغط هنا';
+                    break;
+
+                case 2:
+                    // الخطوة الثانية: انزل الزر مرة أخرى واظهر النص الثاني
+                    prankTexts.p2.textContent = 'ههه صدقت؟ انا اصلا دارس دورات متلك لهيك حضرتلك مفاجاة';
+                    prankBtn.style.top = '60px'; // انزل أكثر
+                    prankBtn.textContent = 'اضغط هنا';
+                    break;
+
+                case 3:
+                    // الخطوة الثالثة: اظهر النص الثالث
+                    prankTexts.p3.textContent = 'هههههههه تفكر اذا كنا دارسين دورات وفارشين يعني عادي نشخص حالات؟!';
+                    prankBtn.style.top = '90px'; // انزل أكثر
+                    prankBtn.textContent = 'اضغط للمرة الأخيرة، أعدك!';
+                    break;
+                
+                case 4:
+                    // الخطوة الرابعة: اظهر النص الأخير واجعل الزر يقفز
+                    prankTexts.p4.textContent = 'سوف ترى المفاجأة...';
+                    prankTexts.p5.textContent = 'الحقني إن استطعت!';
+                    prankBtn.textContent = '😂';
+                    prankBtn.classList.add('jumping');
+
+                    // ابدأ بجعل الزر يقفز عند محاولة المرور فوقه بالماوس
+                    prankBtn.addEventListener('mouseover', jumpAround);
+                    break;
+            }
+        });
+
+        function jumpAround() {
+            // احصل على أبعاد الحاوية
+            const container = document.getElementById('prank-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            // احصل على أبعاد الزر
+            const btnRect = prankBtn.getBoundingClientRect();
+
+            // احسب مواقع عشوائية جديدة داخل الحاوية
+            const newTop = Math.random() * (containerRect.height - btnRect.height);
+            const newLeft = Math.random() * (containerRect.width - btnRect.width);
+
+            // طبق المواقع الجديدة على الزر
+            prankBtn.style.position = 'absolute'; // تأكد من أن الوضع مطلق
+            prankBtn.style.top = `${newTop}px`;
+            prankBtn.style.left = `${newLeft}px`;
+            prankBtn.style.transform = 'none'; // ألغِ التحويل السابق ليعمل left بشكل صحيح
+        }
+        // =================================================================================
+        // ✨✨✨  منطق برمجة زر المزاح ينتهي هنا  ✨✨✨
+        // =================================================================================
+
+    } // نهاية دالة setupEventListeners
+
+
     function initializeApp() {
         setupEventListeners();
-
-        // تحديد الشاشة الأولية بناءً على الرابط (الهاش)
-        const initialScreen = location.hash ? location.hash.substring(1) : 'start';
-        
-        // عرض الشاشة الأولية
-        showScreen(initialScreen);
-
-        // استبدال الحالة الأولية الفارغة بحالة شاشة البداية
-        // هذا يضمن أن زر الرجوع من أي شاشة أخرى سيعود إلى شاشة البداية وليس خارج الموقع
-        history.replaceState({ screen: initialScreen }, `Screen ${initialScreen}`, `#${initialScreen}`);
+        // استبدل الحالة الأولية الفارغة بحالة شاشة البداية
+        history.replaceState({ screen: 'start' }, 'Screen start');
+        showScreen('start', true);
     }
 
-    // --- بدء تشغيل التطبيق ---
     initializeApp();
 
 }); // نهاية مستمع `DOMContentLoaded`
