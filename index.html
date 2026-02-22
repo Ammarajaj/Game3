@@ -2,46 +2,170 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>رحلة المشخّص</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المشخص المحترف</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- شاشة البداية -->
-    <div id="start-screen" class="screen active">
-        <h1>رحلة المشخّص</h1>
-        <p>أنت في رحلة من 15 حالة سريرية. لديك ميزانية محدودة، فاستخدمها بحكمة. خطأ واحد يعني الخسارة الكاملة.</p>
-        <button id="start-button">ابدأ الرحلة</button>
-    </div>
 
-    <!-- شاشة اللعب الرئيسية -->
-    <div id="game-screen" class="screen">
-        <div id="hud">
-            <div id="progress-container">السؤال: <span id="progress">1/15</span></div>
-            <div id="budget-container">الميزانية: <span id="budget">200</span></div>
+    <div id="main-container">
+
+        <!-- شاشة البداية والإرشادات -->
+        <div id="start-screen" class="screen active">
+            <div class="content-wrapper">
+                <h1 class="main-title">المشخص المحترف</h1>
+                <p class="intro-text">مرحباً بك في منصة محاكاة التشخيص السريري. هل أنت مستعد لاختبار معرفتك الطبية؟</p>
+                
+                <div id="initial-instructions" class="instructions-box">
+                    <h3 class="instructions-title">كيف تعمل المنصة؟</h3>
+                    <p>لديك وضعان للعب:</p>
+                    <ul>
+                        <li><strong>وضع التدريب (المناوبات):</strong> اختر تخصصاً وراجع حالاته. الخطأ هنا لا ينهي اللعبة، بل يخصم نقاطاً كعقوبة. هذا الوضع مخصص للتعلم فقط ونتائجه لا تسجل.</li>
+                        <li><strong>الجولة الكبرى:</strong> هذا هو التحدي الحقيقي! ستواجه 16 حالة عشوائية من كل التخصصات. خطأ واحد يعني الخسارة. نتيجتك هنا فقط هي التي ستسجل في لوحة الصدارة.</li>
+                    </ul>
+                    <button id="start-game-btn" class="action-btn primary-btn">فهمت، لنبدأ!</button>
+                </div>
+            </div>
         </div>
-        <div id="case-description"></div>
-        <div id="info-board"></div>
-        <div id="toolkit">
-            <div class="tool" data-tool="pen">🖊️<span class="tool-name">القصة</span><span class="cost">-10</span></div>
-            <div class="tool" data-tool="magnifier">🔍<span class="tool-name">التأمل</span><span class="cost">-10</span></div>
-            <div class="tool" data-tool="hand">🖐️<span class="tool-name">الجس</span><span class="cost">-10</span></div>
-            <div class="tool" data-tool="stethoscope">🩺<span class="tool-name">الإصغاء</span><span class="cost">-10</span></div>
-            <div class="tool" data-tool="hammer">🔨<span class="tool-name">المنعكسات</span><span class="cost">-10</span></div>
+
+        <!-- شاشة اختيار وضع اللعب -->
+        <div id="mode-selection-screen" class="screen">
+            <h2 class="screen-title">اختر وضع اللعب</h2>
+            <div class="mode-buttons">
+                <button id="training-mode-btn" class="mode-btn">
+                    <span class="mode-icon">💪</span>
+                    <h3>وضع التدريب (المناوبات)</h3>
+                    <p>للدراسة والمراجعة المركزة</p>
+                </button>
+                <button id="grand-round-btn" class="mode-btn">
+                    <span class="mode-icon">🏆</span>
+                    <h3>بدء الجولة الكبرى</h3>
+                    <p>للمنافسة على لوحة الصدارة</p>
+                </button>
+            </div>
+            <button id="leaderboard-btn-main" class="secondary-btn">عرض لوحة الصدارة</button>
         </div>
-        <button id="diagnose-button">✅ تشخيص نهائي</button>
-    </div>
 
-    <!-- شاشة التشخيص (الخيارات) -->
-    <div id="diagnosis-screen" class="screen">
-        <h2>ما هو تشخيصك النهائي؟</h2>
-        <div id="choices-container"></div>
-    </div>
+        <!-- شاشة اختيار التخصص (للمناوبات) -->
+        <div id="specialty-selection-screen" class="screen">
+            <h2 class="screen-title">اختر مناوبة للتدريب</h2>
+            <div id="specialty-grid" class="specialty-grid">
+                <!-- سيتم ملء التخصصات هنا عبر جافاسكريبت -->
+            </div>
+            <button class="back-to-mode-selection-btn secondary-btn">العودة</button>
+        </div>
 
-    <!-- شاشة الخسارة/الفوز -->
-    <div id="game-over-screen" class="screen">
-        <h1 id="game-over-title"></h1>
-        <p id="game-over-reason"></p>
-        <button id="restart-button">إعادة اللعب</button>
+        <!-- شاشة اللعب الرئيسية -->
+        <div id="game-screen" class="screen">
+            <div id="game-header">
+                <div class="header-stat">الميزانية: <span id="budget-display">200</span></div>
+                <div class="header-stat">السؤال: <span id="question-counter">1 / 16</span></div>
+                <div class="header-stat" id="timer-display" style="display: none;">الوقت: <span>60</span></div>
+            </div>
+
+            <div id="case-presentation">
+                <h3 id="case-title">الحالة رقم #1</h3>
+                <p id="case-description">مريض عمره 55 عاماً، مدخن، أتى إلى الإسعاف يشكو من ألم صدري ضاغط وحاد بدأ منذ ساعة.</p>
+            </div>
+
+            <div id="patient-file">
+                <h4>ملف المريض</h4>
+                <div id="file-content">
+                    <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
+                </div>
+            </div>
+
+            <div id="diagnostic-tools">
+                <div class="tool" data-tool="history" data-cost="10">🖊️<span>القصة</span></div>
+                <div class="tool" data-tool="inspection" data-cost="10">🔍<span>التأمل</span></div>
+                <div class="tool" data-tool="palpation" data-cost="10">🖐️<span>الجس</span></div>
+                <div class="tool" data-tool="percussion" data-cost="10">👆<span>القرع</span></div>
+                <div class="tool" data-tool="auscultation" data-cost="10">🩺<span>السماعة</span></div>
+                <div class="tool" data-tool="reflexes" data-cost="10">🔨<span>المنعكسات</span></div>
+                <div class="tool" data-tool="ecg" data-cost="15">⚡️<span>تخطيط القلب</span></div>
+                <div class="tool" data-tool="xray" data-cost="15">🩻<span>صورة بسيطة</span></div>
+                <div class="tool" data-tool="labs" data-cost="15">🩸<span>تحاليل</span></div>
+            </div>
+            
+            <div id="assistance-tools">
+                <div class="assist-tool" id="consultation-tool" data-cost="15">💡<span>استشارة (تلميح)</span></div>
+                <div class="assist-tool" id="brainstorm-tool" data-cost="20">🧠<span>عصف ذهني (التشخيصات)</span></div>
+            </div>
+
+            <div id="diagnosis-section">
+                <h4>ما هو تشخيصك الأولي؟</h4>
+                <div id="choices-container">
+                    <!-- سيتم ملء الخيارات هنا -->
+                </div>
+            </div>
+        </div>
+
+        <!-- شاشة الخسارة -->
+        <div id="lose-screen" class="screen">
+            <div class="content-wrapper">
+                <h1 class="lose-title">لقد خسرت!</h1>
+                <p id="lose-reason">إجابة خاطئة. التشخيص الصحيح كان: احتشاء العضلة القلبية.</p>
+                <p>لا تستسلم! كل خطأ هو فرصة للتعلم.</p>
+                <button id="restart-grand-round-btn" class="action-btn primary-btn">محاولة جديدة في الجولة الكبرى</button>
+                <button id="back-to-main-menu-lose" class="secondary-btn">العودة للقائمة الرئيسية</button>
+            </div>
+        </div>
+
+        <!-- شاشة الفوز -->
+        <div id="win-screen" class="screen">
+            <div class="content-wrapper">
+                <h1 class="win-title">🎉 تهانينا! لقد فزت! 🎉</h1>
+                <p>لقد أكملت الجولة الكبرى بنجاح وأثبتّ أنك مشخص محترف!</p>
+                <div class="results-summary">
+                    <h3>ملخص نتيجتك:</h3>
+                    <p><strong>النتيجة الأساسية:</strong> <span id="final-score"></span> نقطة</p>
+                    <p><strong>إجمالي المحاولات:</strong> <span id="total-attempts"></span></p>
+                    <p><strong>متوسط كفاءة الأداة:</strong> <span id="avg-tool-efficiency"></span> أداة/سؤال</p>
+                    <div class="final-percentage">
+                        <strong>مؤشر الكفاءة الإجمالي:</strong>
+                        <span id="final-percentage-display"></span>
+                    </div>
+                </div>
+                <div class="leaderboard-input">
+                    <input type="text" id="player-name-input" placeholder="أدخل اسمك لتسجيل النتيجة">
+                    <button id="save-score-btn" class="action-btn primary-btn">حفظ في لوحة الصدارة</button>
+                </div>
+                 <button id="back-to-main-menu-win" class="secondary-btn">العودة للقائمة الرئيسية</button>
+            </div>
+        </div>
+
+        <!-- شاشة لوحة الصدارة -->
+        <div id="leaderboard-screen" class="screen">
+            <h2 class="screen-title">🏆 لوحة الصدارة 🏆</h2>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>الترتيب</th>
+                        <th>الاسم</th>
+                        <th>مؤشر الكفاءة</th>
+                        <th>النتيجة</th>
+                        <th>المحاولات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم ملء الصفوف هنا -->
+                </tbody>
+            </table>
+            <button class="back-to-main-menu-leaderboard secondary-btn">العودة للقائمة الرئيسية</button>
+        </div>
+
+        <!-- نافذة منبثقة للإشعارات -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h3 id="modal-title">عنوان الإشعار</h3>
+                <p id="modal-text">نص الإشعار هنا.</p>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
