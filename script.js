@@ -437,15 +437,17 @@ reserve: {
 // =================================================================================
 // ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` التي نسختها هنا
 // =================================================================================
+// =================================================================================
+// ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` التي نسختها هنا
+// =================================================================================
 
 
 // انتظر حتى يتم تحميل كل محتوى الصفحة تمامًا
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- سنقوم بتعريف كل المتغيرات هنا، داخل المستمع ---
-    // هذا يضمن 100% أن العناصر موجودة
+    // --- تعريف كل المتغيرات هنا، داخل المستمع ---
     
-    // 2. عناصر الواجهة
+    // 1. عناصر الواجهة الرئيسية
     const screens = {
         start: document.getElementById('start-screen'),
         modeSelection: document.getElementById('mode-selection-screen'),
@@ -453,7 +455,6 @@ document.addEventListener('DOMContentLoaded', () => {
         game: document.getElementById('game-screen'),
         lose: document.getElementById('lose-screen'),
         win: document.getElementById('win-screen'),
-        stats: document.getElementById('stats-screen'),
     };
     const buttons = {
         startGame: document.getElementById('start-game-btn'),
@@ -461,10 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
         grandRound: document.getElementById('grand-round-btn'),
         skipQuestion: document.getElementById('skip-question-btn'),
         restartGrandRound: document.getElementById('restart-grand-round-btn'),
-        backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
         backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
-        showStats: document.getElementById('stats-btn-main'), // التصحيح الأصلي
-        backToMainMenuStats: document.getElementById('back-to-main-menu-stats'),
     };
     const gameElements = {
         budgetDisplay: document.getElementById('budget-display'),
@@ -475,12 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
         patientFileContent: document.getElementById('file-content'),
         choicesContainer: document.getElementById('choices-container'),
     };
-    const statsElements = {
-        bestPercentage: document.getElementById('best-percentage'),
-        totalAttempts: document.getElementById('total-attempts-stats'),
-        highestStage: document.getElementById('highest-stage'),
-        recentHistory: document.getElementById('recent-history-list'),
-    };
     const modal = {
         element: document.getElementById('modal'),
         title: document.getElementById('modal-title'),
@@ -489,6 +481,16 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmBtn: document.getElementById('modal-confirm-btn'),
         cancelBtn: document.getElementById('modal-cancel-btn'),
     };
+
+    // ✅ 2. تعريف عناصر شاشة الإحصائيات الجديدة
+    const statsPage = document.getElementById('statistics-page');
+    const showStatsButton = document.getElementById('show-stats-button');
+    const statsBackButton = document.getElementById('stats-back-button');
+    const statsBestPercentage = document.getElementById('stats-best-percentage');
+    const statsTotalAttempts = document.getElementById('stats-total-attempts');
+    const statsHighestStage = document.getElementById('stats-highest-stage');
+    const statsHistoryList = document.getElementById('stats-history-list');
+
 
     // 3. متغيرات حالة اللعبة
     let gameState = {};
@@ -502,13 +504,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let currentScreenName = 'start';
 
-    // --- كل الدوال يجب أن تكون هنا أيضاً أو يمكن الوصول إليها ---
-    // (للبساطة، سنتركها في النطاق العام كما كانت، لكن التعريفات أعلاه الآن مضمونة)
-
-    // --- وظائف التحكم بالواجهة (مع دعم زر الرجوع) ---
+    // --- وظائف التحكم بالواجهة ---
     function showScreen(screenName, isPoppingState = false) {
+        // إخفاء كل الشاشات أولاً
         Object.values(screens).forEach(screen => screen.classList.remove('active'));
-        screens[screenName].classList.add('active');
+        statsPage.classList.remove('active'); // التأكد من إخفاء شاشة الإحصائيات أيضاً
+
+        if (screens[screenName]) {
+            screens[screenName].classList.add('active');
+        }
         currentScreenName = screenName;
 
         if (!isPoppingState) {
@@ -570,21 +574,32 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('personalStats', JSON.stringify(personalStats));
     }
 
-    function displayStats() {
-        statsElements.bestPercentage.textContent = `${personalStats.bestPercentage}%`;
-        statsElements.totalAttempts.textContent = personalStats.totalAttempts;
-        statsElements.highestStage.textContent = personalStats.highestStage;
-        statsElements.recentHistory.innerHTML = '';
+    // ✅ دالة جديدة ومحسنة لعرض الإحصائيات
+    function showStatistics() {
+        // 1. إخفاء كل الشاشات الأخرى
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        
+        // 2. تحديث البيانات من المتغير العام personalStats
+        statsBestPercentage.textContent = `${personalStats.bestPercentage}%`;
+        statsTotalAttempts.textContent = personalStats.totalAttempts;
+        statsHighestStage.textContent = personalStats.highestStage;
+
+        // 3. تحديث سجل المحاولات
+        statsHistoryList.innerHTML = ''; // تفريغ القائمة أولاً
         if (personalStats.recentHistory.length === 0) {
-            statsElements.recentHistory.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
+            statsHistoryList.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
         } else {
+            // عرض المحاولات من الأحدث إلى الأقدم
             [...personalStats.recentHistory].reverse().forEach(attempt => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>النتيجة: <b>${attempt.percentage}%</b></span> <span>المرحلة: ${attempt.stage}</span>`;
-                statsElements.recentHistory.appendChild(li);
+                statsHistoryList.appendChild(li);
             });
         }
-        showScreen('stats');
+
+        // 4. إظهار شاشة الإحصائيات
+        statsPage.classList.add('active');
+        currentScreenName = 'statistics'; // تحديث اسم الشاشة الحالية
     }
 
     function startTrainingMode(specialty) {
@@ -839,38 +854,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- نقطة الانطلاق ---
+    // --- نقطة الانطلاق وربط الأحداث ---
     function setupEventListeners() {
-        // التحقق من وجود كل زر قبل ربط الحدث
-        if (!buttons.showStats) {
-            alert("فشل العثور على زر الإحصائيات 'stats-btn-main'.");
-            return; // أوقف التنفيذ إذا كان الزر الرئيسي مفقودًا
-        }
-
         buttons.startGame.onclick = () => showScreen('modeSelection');
         buttons.trainingMode.onclick = setupSpecialtySelection;
         buttons.grandRound.onclick = () => {
             showModal(
-                '<h3>🏆 قواعد الجولة الكبرى: دليل المشخص المحترف</h3>',
-                `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ. هدفك هو إثبات أنك تملك المعرفة والحدس السريري لتجاوز 15 حالة متتالية.</p>
+                '<h3>🏆 قواعد الجولة الكبرى</h3>',
+                `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p>
                 <ul>
-                    <li><b>🧠 الهدف الأساسي:</b> حل 15 حالة سريرية يتم اختيارها عشوائياً، وتتدرج في الصعوبة.</li>
-                    <li><b>💰 الميزانية الأولية:</b> تبدأ رحلتك بـ <b>200 نقطة</b>. إدارتها بحكمة هي مفتاح النجاح.</li>
-                    <li><b>⏳ عداد الوقت:</b> لديك <b>15 دقيقة فقط</b> لإكمال الجولة. إذا انتهى الوقت، تنتهي الجولة.</li>
-                    <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
+                    <li><b>الهدف:</b> حل 15 حالة سريرية عشوائية.</li>
+                    <li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li>
+                    <li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li>
+                    <li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
                 </ul>
-                <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`,
+                <p><b>هل أنت مستعد؟</b></p>`,
                 true,
                 startGrandRound
             );
         };
         buttons.skipQuestion.onclick = skipQuestion;
         buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
-        buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
         
-        buttons.showStats.onclick = displayStats; // الربط المباشر والصحيح
-        buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
+        // ✅ ربط الأحداث للأزرار الجديدة الخاصة بالإحصائيات
+        showStatsButton.onclick = showStatistics;
+        statsBackButton.onclick = () => showScreen('modeSelection');
 
         document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
             if (tool.dataset.tool === 'consultation') {
@@ -898,6 +907,4 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 
 }); // نهاية مستمع `DOMContentLoaded`
-        
-
-
+                          
