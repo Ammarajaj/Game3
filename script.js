@@ -152,39 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ✅ تعديل 2: دالة محدثة لترتيب الأسئلة وتتبعها
-    function startGrandRound() {
-        if (personalStats.isFirstAttempt) {
-            personalStats.isFirstAttempt = false;
-        }
-        personalStats.totalAttempts++;
-        saveStats();
-
-        let questions;
-        let usedQuestionIds = new Set();
-
-        if (personalStats.totalAttempts === 1) {
-            questions = [...challengeBank.core.easy, ...challengeBank.core.medium, ...challengeBank.core.hard];
-        } else {
-            const easy = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
-            const medium = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
-            const hard = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
-            questions = [...easy, ...medium, ...hard];
-        }
-
-        questions.forEach(q => usedQuestionIds.add(q.id));
-
-        gameState = {
-            mode: 'grand_round',
-            questions: questions,
-            currentQuestionIndex: 0,
-            budget: 200,
-            usedQuestionIds: usedQuestionIds,
-        };
-        startTimer(15 * 60, gameElements.timerDisplay);
-        setupQuestion();
-        showScreen('game');
-    }
-
+    
     // --- دوال منطق اللعبة ---
     function setupQuestion() {
         gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
@@ -211,7 +179,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ✅ تعديل 3: دالة محدثة لاستخدام النوافذ المؤقتة
+    // 🔴 استبدل دالة startGrandRound القديمة بهذه 🔴
+function startGrandRound() {
+    if (personalStats.isFirstAttempt) {
+        personalStats.isFirstAttempt = false;
+    }
+    personalStats.totalAttempts++;
+    saveStats();
+
+    let questions;
+    let usedQuestionIds = new Set(); // لتتبع الأسئلة المستخدمة
+
+    if (personalStats.totalAttempts === 1) {
+        // المحاولة الأولى تستخدم الأسئلة الأساسية بالترتيب
+        questions = [
+            ...challengeBank.core.easy,
+            ...challengeBank.core.medium,
+            ...challengeBank.core.hard
+        ];
+    } else {
+        // المحاولات التالية تختار عشوائياً من البنك الاحتياطي وتحافظ على الترتيب
+        const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
+        const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
+        const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
+        
+        // دمج الأسئلة بالترتيب: سهل -> متوسط -> صعب
+        questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+    }
+
+    // إضافة IDs الأسئلة الأولية إلى مجموعة المستخدمة
+    questions.forEach(q => usedQuestionIds.add(q.id));
+
+    gameState = {
+        mode: 'grand_round',
+        questions: questions,
+        currentQuestionIndex: 0,
+        budget: 200,
+        usedQuestionIds: usedQuestionIds, // إضافة المجموعة إلى حالة اللعبة
+    };
+    startTimer(15 * 60, gameElements.timerDisplay);
+    setupQuestion();
+    showScreen('game');
+}
+    
     function checkAnswer(selectedAnswer) {
         document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
         const question = gameState.questions[gameState.currentQuestionIndex];
