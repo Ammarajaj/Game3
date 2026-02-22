@@ -11,11 +11,15 @@
 </head>
 <body>
 
+    <!-- ================================================== -->
+    <!--                  شاشات الواجهة الرئيسية             -->
+    <!-- ================================================== -->
+
     <!-- شاشة البداية -->
     <div id="start-screen" class="screen active">
         <div class="container">
-            <h1>منصة المشخّص المحترف</h1>
-            <p>منصة لكشف قناصي بصمجة الدورات 😁.</p>
+            <h1>منصة المشخص المحترف</h1>
+            <p>أداة تفاعلية لصقل مهاراتك في التشخيص السريري.</p>
             <button id="start-game-btn" class="btn-primary">ابدأ الآن</button>
         </div>
     </div>
@@ -48,13 +52,13 @@
         </div>
     </div>
 
-    <!-- شاشة اللعب الرئيسية -->
+    <!-- ================================================== -->
+    <!--                  شاشة اللعب الرئيسية                -->
+    <!-- ================================================== -->
     <div id="game-screen" class="screen">
-        <div class="container">
-            <!-- كل عناصر اللعبة الآن داخل حاوية واحدة مرنة -->
+        <div class="game-layout">
+            <!-- المحتوى الرئيسي (السؤال والخيارات) -->
             <div class="main-content">
-                
-                <!-- 1. رأس الصفحة (الميزانية والوقت) -->
                 <div class="game-header">
                     <div class="header-stat">
                         <span>الميزانية</span>
@@ -70,13 +74,18 @@
                     </div>
                 </div>
 
-                <!-- 2. السؤال الرئيسي -->
                 <div class="case-container">
                     <h3 id="case-title">الحالة رقم #1</h3>
                     <p id="case-description">مريض أتى بشكوى...</p>
                 </div>
 
-                <!-- 3. ملف المريض (صغير) -->
+                <div class="choices-container" id="choices-container">
+                    <!-- الخيارات ستظهر هنا مباشرة عبر جافاسكريبت -->
+                </div>
+            </div>
+
+            <!-- ملف المريض وصندوق الأدوات -->
+            <div class="sidebar">
                 <div id="patient-file-area" class="patient-file-area">
                     <h3>ملف المريض</h3>
                     <div id="file-content" class="file-content">
@@ -84,44 +93,70 @@
                     </div>
                 </div>
 
-                <!-- 4. صندوق الأدوات -->
                 <div class="toolbox-area">
                     <div class="toolbox-header">
                         <h3>صندوق الأدوات</h3>
-                        <small>ليست كل الأدوات مفيدة، استخدم الأداة المناسبة. الأرقام الحمراء هي تكلفة الأداة من الميزانية.</small>
+                        <p>استخدم الأداة المناسبة. الأرقام هي تكلفة الأداة.</p>
                     </div>
                     <div class="toolbox">
-                        <!-- أدوات التشخيص -->
-                        <div class="tool-item" data-tool="history"><span class="tool-cost">10</span><span class="tool-icon">📜</span><span class="tool-name">قصة مرضية</span></div>
-                        <div class="tool-item" data-tool="inspection"><span class="tool-cost">10</span><span class="tool-icon">👀</span><span class="tool-name">فحص سريري</span></div>
-                        <div class="tool-item" data-tool="palpation"><span class="tool-cost">10</span><span class="tool-icon">✋</span><span class="tool-name">جس</span></div>
-                        <div class="tool-item" data-tool="percussion"><span class="tool-cost">10</span><span class="tool-icon">🥁</span><span class="tool-name">قرع</span></div>
-                        <div class="tool-item" data-tool="auscultation"><span class="tool-cost">10</span><span class="tool-icon">🩺</span><span class="tool-name">تسمع</span></div>
-                        <div class="tool-item" data-tool="reflexes"><span class="tool-cost">10</span><span class="tool-icon">🔨</span><span class="tool-name">منعكسات</span></div>
-                        <div class="tool-item" data-tool="labs"><span class="tool-cost">10</span><span class="tool-icon">🩸</span><span class="tool-name">تحاليل</span></div>
-                        <div class="tool-item" data-tool="xray"><span class="tool-cost">10</span><span class="tool-icon">🩻</span><span class="tool-name">أشعة X</span></div>
-                        <div class="tool-item" data-tool="ecg"><span class="tool-cost">10</span><span class="tool-icon">❤️</span><span class="tool-name">تخطيط قلب</span></div>
+                        <!-- أدوات التشخيص المحدثة -->
+                        <div class="tool-item" data-tool="taammul">
+                            <span class="tool-cost">10</span>
+                            <span class="tool-icon">👀</span>
+                            <span class="tool-name">تأمل</span>
+                        </div>
+                        <div class="tool-item" data-tool="jass">
+                            <span class="tool-cost">10</span>
+                            <span class="tool-icon">✋</span>
+                            <span class="tool-name">جس</span>
+                        </div>
+                        <div class="tool-item" data-tool="qar">
+                            <span class="tool-cost">10</span>
+                            <span class="tool-icon">🥁</span>
+                            <span class="tool-name">قرع</span>
+                        </div>
+                        <div class="tool-item" data-tool="tasammu">
+                            <span class="tool-cost">10</span>
+                            <span class="tool-icon">🩺</span>
+                            <span class="tool-name">تسمع</span>
+                        </div>
+                        <div class="tool-item" data-tool="munakkisat">
+                            <span class="tool-cost">10</span>
+                            <span class="tool-icon">🔨</span>
+                            <span class="tool-name">منعكسات</span>
+                        </div>
+                        <div class="tool-item" data-tool="tahmeel">
+                            <span class="tool-cost">20</span>
+                            <span class="tool-icon">🩸</span>
+                            <span class="tool-name">تحاليل</span>
+                        </div>
+                        <div class="tool-item" data-tool="takhṭīṭ_qalb">
+                            <span class="tool-cost">15</span>
+                            <span class="tool-icon">❤️</span>
+                            <span class="tool-name">تخطيط قلب</span>
+                        </div>
+                        
                         <!-- أدوات المساعدة -->
-                        <div class="tool-item assist-tool" data-tool="brainstorm"><span class="tool-cost">25</span><span class="tool-icon">🧠</span><span class="tool-name">عصف ذهني</span></div>
-                        <div class="tool-item assist-tool" data-tool="consultation"><span class="tool-cost">40</span><span class="tool-icon">💡</span><span class="tool-name">استشارة 50/50</span></div>
+                        <div class="tool-item assist-tool" data-tool="consultation">
+                            <span class="tool-cost">40</span>
+                            <span class="tool-icon">💡</span>
+                            <span class="tool-name">استشارة 50/50</span>
+                        </div>
+
+                        <!-- زر تخطي السؤال -->
+                        <div id="skip-question-btn" class="tool-item skip-btn">
+                            <span class="tool-icon">⏭️</span>
+                            <span class="tool-name">تخطي (30-)</span>
+                        </div>
                     </div>
                 </div>
-
-                <!-- 5. زر التشخيص -->
-                <div class="diagnose-btn-container">
-                    <button id="diagnose-btn" class="diagnose-btn">
-                        <span class="icon">🧑‍⚕️</span> وضع التشخيص
-                    </button>
-                </div>
-
-                <!-- 6. حاوية خيارات التشخيص (تظهر لاحقاً) -->
-                <div class="choices-container" id="choices-container">
-                    <p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>
-                </div>
-
             </div>
         </div>
     </div>
+
+    <!-- ================================================== -->
+    <!--                  شاشات النتائج والنافذة             -->
+    <!-- ================================================== -->
 
     <!-- شاشة الخسارة -->
     <div id="lose-screen" class="screen">
@@ -129,8 +164,7 @@
             <h2>للأسف، لقد خسرت!</h2>
             <p id="lose-reason">إجابة خاطئة.</p>
             <div class="result-buttons">
-                <button id="restart-grand-round-btn" class="btn-primary">إعادة المحاولة</button>
-                <button id="back-to-main-menu-lose" class="btn-secondary">القائمة الرئيسية</button>
+                <button id="restart-grand-round-btn" class="btn-primary">العودة للقائمة</button>
             </div>
         </div>
     </div>
@@ -174,12 +208,16 @@
         </div>
     </div>
 
-    <!-- النافذة المنبثقة (Modal) -->
+    <!-- النافذة المنبثقة (Modal) مع أزرار التأكيد -->
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <h3 id="modal-title">عنوان النافذة</h3>
             <div id="modal-text">نص النافذة...</div>
+            <div class="modal-buttons">
+                <button id="modal-confirm-btn" class="btn-primary">نعم، تأكيد</button>
+                <button id="modal-cancel-btn" class="btn-secondary">إلغاء</button>
+            </div>
         </div>
     </div>
 
