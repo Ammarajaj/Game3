@@ -48,17 +48,13 @@
         </div>
     </div>
 
-    <!-- شاشة اللعب الرئيسية -->
+    <!-- شاشة اللعب الرئيسية (تم تعديل البنية هنا) -->
     <div id="game-screen" class="screen">
-        <div class="game-layout">
-            <div id="patient-file-area" class="patient-file-area">
-                <h3>ملف المريض</h3>
-                <div id="file-content" class="file-content">
-                    <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
-                </div>
-            </div>
-
+        <div class="container">
+            <!-- كل عناصر اللعبة الآن داخل حاوية واحدة مرنة -->
             <div class="main-content">
+                
+                <!-- 1. رأس الصفحة (الميزانية والوقت) -->
                 <div class="game-header">
                     <div class="header-stat">
                         <span>الميزانية</span>
@@ -74,85 +70,52 @@
                     </div>
                 </div>
 
+                <!-- 2. السؤال الرئيسي -->
                 <div class="case-container">
                     <h3 id="case-title">الحالة رقم #1</h3>
                     <p id="case-description">مريض أتى بشكوى...</p>
                 </div>
 
+                <!-- 3. ملف المريض (صغير) -->
+                <div id="patient-file-area" class="patient-file-area">
+                    <h3>ملف المريض</h3>
+                    <div id="file-content" class="file-content">
+                        <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
+                    </div>
+                </div>
+
+                <!-- 4. صندوق الأدوات -->
+                <div class="toolbox-area">
+                    <h3>صندوق الأدوات</h3>
+                    <div class="toolbox">
+                        <!-- أدوات التشخيص -->
+                        <div class="tool-item" data-tool="history"><span class="tool-cost">10</span><span class="tool-icon">📜</span><span class="tool-name">قصة مرضية</span></div>
+                        <div class="tool-item" data-tool="inspection"><span class="tool-cost">10</span><span class="tool-icon">👀</span><span class="tool-name">فحص سريري</span></div>
+                        <div class="tool-item" data-tool="palpation"><span class="tool-cost">10</span><span class="tool-icon">✋</span><span class="tool-name">جس</span></div>
+                        <div class="tool-item" data-tool="percussion"><span class="tool-cost">10</span><span class="tool-icon">🥁</span><span class="tool-name">قرع</span></div>
+                        <div class="tool-item" data-tool="auscultation"><span class="tool-cost">10</span><span class="tool-icon">🩺</span><span class="tool-name">تسمع</span></div>
+                        <div class="tool-item" data-tool="reflexes"><span class="tool-cost">10</span><span class="tool-icon">🔨</span><span class="tool-name">منعكسات</span></div>
+                        <div class="tool-item" data-tool="labs"><span class="tool-cost">10</span><span class="tool-icon">🩸</span><span class="tool-name">تحاليل</span></div>
+                        <div class="tool-item" data-tool="xray"><span class="tool-cost">10</span><span class="tool-icon">🩻</span><span class="tool-name">أشعة X</span></div>
+                        <div class="tool-item" data-tool="ecg"><span class="tool-cost">10</span><span class="tool-icon">❤️</span><span class="tool-name">تخطيط قلب</span></div>
+                        <!-- أدوات المساعدة -->
+                        <div class="tool-item assist-tool" data-tool="brainstorm"><span class="tool-cost">25</span><span class="tool-icon">🧠</span><span class="tool-name">عصف ذهني</span></div>
+                        <div class="tool-item assist-tool" data-tool="consultation"><span class="tool-cost">40</span><span class="tool-icon">💡</span><span class="tool-name">استشارة 50/50</span></div>
+                    </div>
+                </div>
+
+                <!-- 5. زر التشخيص -->
+                <div class="diagnose-btn-container">
+                    <button id="diagnose-btn" class="diagnose-btn">
+                        <span class="icon">ախ</span> وضع التشخيص
+                    </button>
+                </div>
+
+                <!-- 6. حاوية خيارات التشخيص (تظهر لاحقاً) -->
                 <div class="choices-container" id="choices-container">
-                    <!-- هذه المنطقة ستكون فارغة في البداية -->
                     <p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>
                 </div>
-            </div>
 
-            <div class="toolbox-area">
-                <h3>صندوق الأدوات</h3>
-                <div class="toolbox">
-                    <!-- أدوات التشخيص -->
-                    <div class="tool-item" data-tool="history">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">📜</span>
-                        <span class="tool-name">قصة مرضية</span>
-                    </div>
-                    <div class="tool-item" data-tool="inspection">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">👀</span>
-                        <span class="tool-name">فحص سريري</span>
-                    </div>
-                    <div class="tool-item" data-tool="palpation">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">✋</span>
-                        <span class="tool-name">جس</span>
-                    </div>
-                    <div class="tool-item" data-tool="percussion">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">🥁</span>
-                        <span class="tool-name">قرع</span>
-                    </div>
-                    <div class="tool-item" data-tool="auscultation">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">🩺</span>
-                        <span class="tool-name">تسمع</span>
-                    </div>
-                    <div class="tool-item" data-tool="reflexes">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">🔨</span>
-                        <span class="tool-name">منعكسات</span>
-                    </div>
-                    <div class="tool-item" data-tool="labs">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">🩸</span>
-                        <span class="tool-name">تحاليل</span>
-                    </div>
-                    <div class="tool-item" data-tool="xray">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">🩻</span>
-                        <span class="tool-name">أشعة X</span>
-                    </div>
-                    <div class="tool-item" data-tool="ecg">
-                        <span class="tool-cost">10</span>
-                        <span class="tool-icon">❤️</span>
-                        <span class="tool-name">تخطيط قلب</span>
-                    </div>
-                    
-                    <!-- أدوات المساعدة والتشخيص -->
-                    <div class="tool-item assist-tool" data-tool="brainstorm">
-                        <span class="tool-cost">25</span>
-                        <span class="tool-icon">🧠</span>
-                        <span class="tool-name">عصف ذهني</span>
-                    </div>
-                    <div class="tool-item assist-tool" data-tool="consultation">
-                        <span class="tool-cost">40</span>
-                        <span class="tool-icon">💡</span>
-                        <span class="tool-name">استشارة 50/50</span>
-                    </div>
-
-                    <!-- زر التشخيص النهائي -->
-                    <div id="diagnose-btn" class="tool-item diagnose-btn">
-                        <span class="tool-icon">ախ</span>
-                        <span class="tool-name">وضع التشخيص</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
