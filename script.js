@@ -530,7 +530,6 @@ function updateStatsOnFinish(isWin) {
     const totalStages = gameState.questions.length;
     
     // معادلة حساب مؤشر الكفاءة
-    // 60% من النتيجة، 40% من التقدم في المراحل
     let efficiency = ((finalScore / 200) * 60) + ((stageReached / totalStages) * 40);
     efficiency = Math.max(0, Math.min(100, efficiency)).toFixed(0);
 
@@ -550,7 +549,6 @@ function updateStatsOnFinish(isWin) {
         percentage: efficiency,
         stage: `${stageReached} / ${totalStages}`
     });
-    // الحفاظ على آخر 5 محاولات فقط
     if (personalStats.recentHistory.length > 5) {
         personalStats.recentHistory.shift();
     }
@@ -566,45 +564,50 @@ function updateStatsOnFinish(isWin) {
 
 
 // =================================================================================
-//                                إعداد مستمعي الأحداث
+//                                إعداد مستمعي الأحداث ونقطة الانطلاق
 // =================================================================================
 
+// هذه الدالة تربط كل زر بوظيفته
 function setupEventListeners() {
-    buttons.startGame.onclick = () => showScreen('modeSelection');
-    buttons.trainingMode.onclick = () => {
+    if (buttons.startGame) buttons.startGame.onclick = () => showScreen('modeSelection');
+    if (buttons.trainingMode) buttons.trainingMode.onclick = () => {
         setupSpecialtySelection();
         showScreen('specialtySelection');
     };
-    buttons.grandRound.onclick = startGrandRound;
-    
-    buttons.restartGrandRound.onclick = startGrandRound;
-    buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
-    buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
+    if (buttons.grandRound) buttons.grandRound.onclick = startGrandRound;
+    if (buttons.restartGrandRound) buttons.restartGrandRound.onclick = startGrandRound;
+    if (buttons.backToMainMenuLose) buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
+    if (buttons.backToMainMenuWin) buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
+    if (buttons.showStats) buttons.showStats.onclick = displayStats;
+    if (buttons.backToMainMenuStats) buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
-    buttons.showStats.onclick = displayStats;
-    buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
-
-    // ربط وظائف الأدوات بالأزرار
     document.querySelectorAll('.tool').forEach(tool => {
         tool.onclick = () => useTool(tool);
     });
     document.querySelectorAll('.assist-tool').forEach(tool => {
         tool.onclick = () => useAssistTool(tool);
     });
+    
+    modal.closeBtn.onclick = () => modal.element.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal.element) {
+            modal.element.style.display = 'none';
+        }
+    };
 }
 
-// =================================================================================
-//                                نقطة انطلاق التطبيق
-// =================================================================================
-setupEventListeners();
-showScreen('start');
-showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
-
-
-// --- نهاية القسم الثالث ---
+// **نقطة الانطلاق النهائية والمصححة**
+// انتظر حتى يتم تحميل كل محتوى الصفحة (HTML)، ثم قم بتشغيل الكود
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. قم بربط جميع الأزرار بوظائفها أولاً
     setupEventListeners();
+    
+    // 2. اعرض الشاشة الابتدائية
     showScreen('start');
+    
+    // 3. اعرض الرسالة الترحيبية
     showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
 });
 
+// --- نهاية القسم الثالث ---
+    
