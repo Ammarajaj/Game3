@@ -123,7 +123,7 @@ let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     recentHistory: []
 };
 let timerInterval;
-let grandRoundRulesShown = false;
+let currentScreen = 'start'; // متغير لتتبع الشاشة الحالية
 
 // =================================================================================
 //                                 القسم الثاني: كل الدوال
@@ -133,31 +133,46 @@ let grandRoundRulesShown = false;
 function showScreen(screenName, isPoppingState = false) {
     Object.values(screens).forEach(screen => screen.classList.remove('active'));
     screens[screenName].classList.add('active');
-    
-    // **الإصلاح: استخدام History API**
+    currentScreen = screenName; // تحديث الشاشة الحالية
+
     if (!isPoppingState) {
         history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
     }
 }
 
+// **تعديل: التعامل مع زر الرجوع في المتصفح**
 window.onpopstate = function(event) {
+    // إذا كان المستخدم في شاشة اللعب وحاول الرجوع
+    if (currentScreen === 'game') {
+        const leave = confirm("هل أنت متأكد من أنك تريد مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.");
+        if (leave) {
+            clearInterval(timerInterval); // إيقاف المؤقت
+            // استعادة الحالة من السجل (الشاشة السابقة)
+            if (event.state && event.state.screen) {
+                showScreen(event.state.screen, true);
+            } else {
+                showScreen('modeSelection', true); // الرجوع إلى شاشة اختيار الوضع كخيار افتراضي
+            }
+        } else {
+            // إذا رفض المستخدم المغادرة، أعده إلى شاشة اللعب
+            history.pushState({ screen: 'game' }, 'Screen game', '#game');
+        }
+        return;
+    }
+
+    // السلوك الطبيعي لبقية الشاشات
     if (event.state && event.state.screen) {
         showScreen(event.state.screen, true);
     } else {
-        // حالة خاصة: إذا وصل المستخدم إلى بداية السجل، اعرض الشاشة الأولى
         showScreen('start', true);
     }
 };
 
-function showModal(title, text, autoCloseDelay = null) {
+function showModal(title, text, buttonsHtml = '') {
     modal.title.innerHTML = title;
-    modal.text.innerHTML = text;
+    // إضافة الأزرار إلى النص إذا كانت موجودة
+    modal.text.innerHTML = text + (buttonsHtml ? `<div class="modal-buttons">${buttonsHtml}</div>` : '');
     modal.element.style.display = 'flex';
-    if (autoCloseDelay) {
-        setTimeout(() => {
-            modal.element.style.display = 'none';
-        }, autoCloseDelay);
-    }
 }
 
 // --- وظائف الإعداد والتحكم ---
@@ -207,25 +222,36 @@ function startTrainingMode(specialty) {
     gameElements.timerDisplay.textContent = '∞';
 }
 
+// **تعديل: إظهار نافذة القواعد مع أزرار**
+function showGrandRoundRules() {
+    const rulesText = `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ. هدفك هو إثبات أنك تملك المعرفة والحدس السريري لتجاوز 15 حالة متتالية.</p>
+        <ul>
+            <li><b>🧠 الهدف الأساسي:</b> حل 15 حالة سريرية يتم اختيارها عشوائياً، وتتدرج في الصعوبة.</li>
+            <li><b>💰 الميزانية الأولية:</b> تبدأ رحلتك بـ <b>200 نقطة</b>. إدارتها بحكمة هي مفتاح النجاح.</li>
+            <li><b>⏳ عداد الوقت:</b> لديك <b>15 دقيقة فقط</b> لإكمال الجولة. إذا انتهى الوقت، تنتهي الجولة.</li>
+            <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
+            <li><b>📈 نظام التقييم:</b> عند انتهاء الجولة، سيتم حساب <b>نسبة أداء مئوية</b> تأخذ بعين الاعتبار النقاط المتبقية والمرحلة التي وصلت إليها.</li>
+        </ul>
+        <p><b>نصيحة استراتيجية:</b> لا تستخدم كل الأدوات في الحالات السهلة. وفر ميزانيتك للحالات المعقدة.</p>
+        <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`;
+    
+    const actionButtons = `
+        <button id="confirm-start-challenge" class="btn-primary">نعم، ابدأ التحدي</button>
+        <button onclick="modal.element.style.display = 'none'" class="btn-secondary">رجوع</button>
+    `;
+
+    showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', rulesText, actionButtons);
+
+    // إضافة مستمع حدث للزر الجديد داخل النافذة
+    document.getElementById('confirm-start-challenge').onclick = () => {
+        modal.element.style.display = 'none'; // إخفاء النافذة
+        startGrandRound(); // بدء اللعبة فعلياً
+    };
+}
+
+// ... (بداية الكود من الرد السابق) ...
+
 function startGrandRound() {
-    // **التحسين: الشرح المفصل للقواعد**
-    if (!grandRoundRulesShown) {
-        showModal(
-            '<h3>🏆 قواعد الجولة الكبرى: دليل المشخص المحترف</h3>',
-            `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ. هدفك هو إثبات أنك تملك المعرفة والحدس السريري لتجاوز 15 حالة متتالية.</p>
-            <ul>
-                <li><b>🧠 الهدف الأساسي:</b> حل 15 حالة سريرية يتم اختيارها عشوائياً، وتتدرج في الصعوبة.</li>
-                <li><b>💰 الميزانية الأولية:</b> تبدأ رحلتك بـ <b>200 نقطة</b>. إدارتها بحكمة هي مفتاح النجاح.</li>
-                <li><b>⏳ عداد الوقت:</b> لديك <b>15 دقيقة فقط</b> لإكمال الجولة. إذا انتهى الوقت، تنتهي الجولة.</li>
-                <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
-                <li><b>📈 نظام التقييم:</b> عند انتهاء الجولة، سيتم حساب <b>نسبة أداء مئوية</b> تأخذ بعين الاعتبار النقاط المتبقية والمرحلة التي وصلت إليها.</li>
-            </ul>
-            <p><b>نصيحة استراتيجية:</b> لا تستخدم كل الأدوات في الحالات السهلة. وفر ميزانيتك للحالات المعقدة.</p>
-            <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`
-        );
-        grandRoundRulesShown = true;
-        return;
-    }
     personalStats.totalAttempts++;
     saveStats();
     const easyQuestions = shuffleArray([...challengeBank.easy]).slice(0, 5);
@@ -255,8 +281,6 @@ function setupSpecialtySelection() {
     });
 }
 
-// ... بداية الكود من الرد السابق ...
-
 function startTimer(duration, display) {
     let timer = duration, minutes, seconds;
     clearInterval(timerInterval);
@@ -278,7 +302,6 @@ function startTimer(duration, display) {
 
 // --- وظائف منطق اللعبة الفعلي ---
 function setupQuestion() {
-    // **الإصلاح: إخفاء الخيارات في البداية**
     gameElements.choicesContainer.innerHTML = '<p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>';
     document.getElementById('diagnose-btn').classList.remove('used');
 
@@ -294,13 +317,12 @@ function setupQuestion() {
     gameElements.caseDescription.textContent = question.case;
 }
 
-// **دالة جديدة لإظهار الخيارات**
 function showChoices() {
     const btn = document.getElementById('diagnose-btn');
-    if (btn.classList.contains('used')) return; // لا تفعل شيئاً إذا تم الضغط عليه بالفعل
+    if (btn.classList.contains('used')) return;
 
     const question = gameState.questions[gameState.currentQuestionIndex];
-    gameElements.choicesContainer.innerHTML = ''; // إفراغ الحاوية
+    gameElements.choicesContainer.innerHTML = '';
     const shuffledChoices = shuffleArray([...question.choices]);
     shuffledChoices.forEach(choice => {
         const button = document.createElement('button');
@@ -309,7 +331,7 @@ function showChoices() {
         button.onclick = () => checkAnswer(choice);
         gameElements.choicesContainer.appendChild(button);
     });
-    btn.classList.add('used'); // تمييز الزر على أنه مستخدم
+    btn.classList.add('used');
 }
 
 function useTool(toolElement) {
@@ -355,7 +377,6 @@ function useAssistTool(toolElement) {
     
     const question = gameState.questions[gameState.currentQuestionIndex];
     if (toolName === 'consultation') {
-        // تأكد من أن الخيارات ظاهرة قبل محاولة إخفائها
         if (gameElements.choicesContainer.querySelector('.choice-btn')) {
             let wrongChoices = question.choices.filter(c => c !== question.answer);
             wrongChoices = shuffleArray(wrongChoices).slice(0, 2);
@@ -367,7 +388,7 @@ function useAssistTool(toolElement) {
             showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
         } else {
             showModal('💡 مساعدة (50/50)', `يجب أن تكون في "وضع التشخيص" أولاً لاستخدام هذه المساعدة. لقد تم خصم النقاط، وستعمل المساعدة بمجرد إظهار الخيارات.`);
-            gameState.consultationUsedEarly = true; // علامة لاستخدامها لاحقاً
+            gameState.consultationUsedEarly = true;
         }
     } else if (toolName === 'brainstorm') {
         const choicesList = question.choices.map(c => `<li>${c}</li>`).join('');
@@ -396,19 +417,21 @@ function checkAnswer(selectedAnswer) {
         const reward = 15;
         updateBudget(reward);
         if (question.nextStep && !gameState.nextStepCompleted) {
-            showModal('تشخيص أولي صحيح!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة. <br> لكن هذه الحالة معقدة وتتطلب قراراً إضافياً.`, 2000);
+            showModal('تشخيص أولي صحيح!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة. <br> لكن هذه الحالة معقدة وتتطلب قراراً إضافياً.`, '');
             gameState.nextStepCompleted = true;
             question.case = question.nextStep.question;
             question.choices = question.nextStep.choices;
             question.answer = question.nextStep.answer;
             setTimeout(setupQuestion, 2000);
         } else {
-            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`, 1500);
+            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`, '');
             setTimeout(nextQuestion, 1500);
         }
     } else {
         if (gameState.mode === 'grand_round') {
-            loseGame(`إجابة خاطئة. انتهت الجولة.`);
+            // **تعديل: رسالة الخسارة المطلوبة**
+            const loseMessage = "لقد خسرت وخسر المريض حياته. شكراً لجهودك المبذولة 😁<br>حاول مرة أخرى أو ارجع إلى القائمة الرئيسية.";
+            loseGame(loseMessage);
         } else {
             const penalty = 25;
             updateBudget(-penalty);
@@ -437,7 +460,7 @@ function nextQuestion() {
 function loseGame(reason) {
     clearInterval(timerInterval);
     updateStatsOnFinish(false);
-    document.getElementById('lose-reason').textContent = reason;
+    document.getElementById('lose-reason').innerHTML = reason; // استخدام innerHTML للسماح بـ <br>
     showScreen('lose');
 }
 
@@ -485,11 +508,11 @@ function setupEventListeners() {
         setupSpecialtySelection();
         showScreen('specialtySelection');
     };
-    buttons.grandRound.onclick = startGrandRound;
+    // **تعديل: إظهار القواعد أولاً بدلاً من بدء اللعبة مباشرة**
+    buttons.grandRound.onclick = showGrandRoundRules;
     buttons.diagnose.onclick = showChoices;
     buttons.restartGrandRound.onclick = () => {
-        grandRoundRulesShown = false;
-        startGrandRound();
+        showGrandRoundRules();
     };
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
@@ -499,7 +522,6 @@ function setupEventListeners() {
     document.querySelectorAll('.tool-item:not(.diagnose-btn)').forEach(tool => {
         if (tool.classList.contains('assist-tool')) {
             tool.onclick = () => useAssistTool(tool);
-
         } else {
             tool.onclick = () => useTool(tool);
         }
@@ -515,16 +537,16 @@ function setupEventListeners() {
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        // إذا كان هناك حالة في السجل (مثل تحديث الصفحة)، اذهب إليها
         if (history.state && history.state.screen) {
             showScreen(history.state.screen, true);
         } else {
+            // ابدأ من البداية وأضف الحالة الأولى إلى السجل
+            history.replaceState({ screen: 'start' }, 'Screen start', '#start');
             showScreen('start');
         }
         setupEventListeners();
         
-        // لا تظهر النافذة الترحيبية عند تحديث الصفحة
-        if (!history.state) {
+        if (!history.state || history.state.screen === 'start') {
             showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
         }
 
