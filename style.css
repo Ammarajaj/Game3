@@ -391,3 +391,14 @@ p { line-height: 1.8; color: var(--text-secondary); font-size: 1rem; }
     border-top: 1px solid var(--border-color);
     padding-top: 1rem;
 }
+
+
+/* في ملف style.css (يمكنك إضافته في أي مكان مناسب) */
+
+.creator-credit {
+    margin-top: 2rem; /* لإضافة مسافة علوية */
+    font-size: 0.9rem; /* تصغير الخط قليلاً */
+    color: var(--text-secondary); /* استخدام اللون الثانوي ليكون هادئًا */
+    border-top: 1px solid var(--border-color); /* إضافة خط فاصل أنيق */
+    padding-top: 1rem;
+}
