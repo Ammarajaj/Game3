@@ -80,33 +80,84 @@
                 </div>
 
                 <div class="choices-container" id="choices-container">
-                    <!-- سيتم ملء أزرار الخيارات هنا -->
+                    <!-- هذه المنطقة ستكون فارغة في البداية -->
+                    <p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>
                 </div>
             </div>
 
             <div class="toolbox-area">
                 <h3>صندوق الأدوات</h3>
                 <div class="toolbox">
-                    <!-- أدوات التشخيص (تكلفة موحدة: 10) -->
-                    <button class="tool" data-tool="history" data-cost="10">📜 القصة المرضية</button>
-                    <button class="tool" data-tool="inspection" data-cost="10">👀 الفحص السريري</button>
-                    <button class="tool" data-tool="palpation" data-cost="10">✋ الجس</button>
-                    <button class="tool" data-tool="percussion" data-cost="10">🥁 القرع</button>
-                    <button class="tool" data-tool="auscultation" data-cost="10">🩺 التسمع</button>
-                    <button class="tool" data-tool="reflexes" data-cost="10">🔨 المنعكسات</button>
-                    <button class="tool" data-tool="labs" data-cost="10">🩸 تحاليل مخبرية</button>
-                    <button class="tool" data-tool="xray" data-cost="10">🩻 أشعة X</button>
-                    <button class="tool" data-tool="ecg" data-cost="10">❤️ تخطيط قلب</button>
+                    <!-- أدوات التشخيص -->
+                    <div class="tool-item" data-tool="history">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">📜</span>
+                        <span class="tool-name">قصة مرضية</span>
+                    </div>
+                    <div class="tool-item" data-tool="inspection">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">👀</span>
+                        <span class="tool-name">فحص سريري</span>
+                    </div>
+                    <div class="tool-item" data-tool="palpation">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">✋</span>
+                        <span class="tool-name">جس</span>
+                    </div>
+                    <div class="tool-item" data-tool="percussion">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">🥁</span>
+                        <span class="tool-name">قرع</span>
+                    </div>
+                    <div class="tool-item" data-tool="auscultation">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">🩺</span>
+                        <span class="tool-name">تسمع</span>
+                    </div>
+                    <div class="tool-item" data-tool="reflexes">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">🔨</span>
+                        <span class="tool-name">منعكسات</span>
+                    </div>
+                    <div class="tool-item" data-tool="labs">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">🩸</span>
+                        <span class="tool-name">تحاليل</span>
+                    </div>
+                    <div class="tool-item" data-tool="xray">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">🩻</span>
+                        <span class="tool-name">أشعة X</span>
+                    </div>
+                    <div class="tool-item" data-tool="ecg">
+                        <span class="tool-cost">10</span>
+                        <span class="tool-icon">❤️</span>
+                        <span class="tool-name">تخطيط قلب</span>
+                    </div>
                     
-                    <!-- أدوات المساعدة (تكلفة خاصة) -->
-                    <button id="brainstorm-tool" class="assist-tool" data-cost="25">🧠 عصف ذهني</button>
-                    <button id="consultation-tool" class="assist-tool" data-cost="40">💡 استشارة (50/50)</button>
+                    <!-- أدوات المساعدة والتشخيص -->
+                    <div class="tool-item assist-tool" data-tool="brainstorm">
+                        <span class="tool-cost">25</span>
+                        <span class="tool-icon">🧠</span>
+                        <span class="tool-name">عصف ذهني</span>
+                    </div>
+                    <div class="tool-item assist-tool" data-tool="consultation">
+                        <span class="tool-cost">40</span>
+                        <span class="tool-icon">💡</span>
+                        <span class="tool-name">استشارة 50/50</span>
+                    </div>
+
+                    <!-- زر التشخيص النهائي -->
+                    <div id="diagnose-btn" class="tool-item diagnose-btn">
+                        <span class="tool-icon">ախ</span>
+                        <span class="tool-name">وضع التشخيص</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- شاشة الخسارة -->
+    <!-- بقية الشاشات (خسارة، فوز، إحصائيات) تبقى كما هي -->
     <div id="lose-screen" class="screen">
         <div class="container result-screen">
             <h2>للأسف، لقد خسرت!</h2>
@@ -118,7 +169,6 @@
         </div>
     </div>
 
-    <!-- شاشة الفوز -->
     <div id="win-screen" class="screen">
         <div class="container result-screen">
             <h2>🎉 تهانينا، لقد فزت! 🎉</h2>
@@ -131,7 +181,6 @@
         </div>
     </div>
 
-    <!-- شاشة الإحصائيات -->
     <div id="stats-screen" class="screen">
         <div class="container">
             <h2>📊 إحصائيات الأداء</h2>
