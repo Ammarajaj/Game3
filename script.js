@@ -468,11 +468,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 1:
                     btnText = 'كنت أمزح معك، اضغط هنا';
                     modalTitle = '🤔';
-                    modalText = 'ههههههه شو صدقت حالك بـ الدورات رح تشخص؟';
+                    modalText = 'ههههههه  صدقت حالك بـ الدورات رح تشخص؟';
                     nextStageAction = () => { jokeStage = 2; setupJokeButton(); };
                     break;
                 case 2:
-                    btnText = 'امزح معك أصلاً! اضغط هنا مجهزلك مفاجأة';
+                    btnText = 'امزح معك أصلاً أنا فارش متلك! اضغط هنا مجهزلك مفاجأة';
                     modalTitle = '🎁';
                     modalText = 'هههههههههههههههههههههه صدقت؟ تنينا فارشين أصلاً... اضغط آخر مرة بوعدك';
                     nextStageAction = runHackingSequence;
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             jokeContainer.innerHTML = '';
-            if (jokeStage > 2) return;
+            if (jokeStage > 3) return;
 
             const jokeBtn = document.createElement('button');
             jokeBtn.id = 'joke-btn';
