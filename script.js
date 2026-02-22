@@ -1,158 +1,537 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- تعريف بنك الأسئلة الكامل (15 سؤال) ---
-    const allQuestions = [
-        // --- المستوى 1: الأساسيات (5 أسئلة) ---
-        { level: 1, description: "شاب عمره 20 عاماً، أتى بألم حاد في الربع السفلي الأيمن من البطن.", toolsInfo: { hand: "عند الجس، يوجد إيلام شديد في نقطة ماكبيرني مع دفاع عضلي." }, choices: ["التهاب المرارة", "التهاب الزائدة الدودية", "حصاة حالب", "التهاب الرتوج", "فتق إربي"], correctAnswer: "التهاب الزائدة الدودية" },
-        { level: 1, description: "طفل عمره 8 سنوات، يعاني من التهاب في الحلق وحرارة، مع طفح جلدي أحمر ناعم الملمس.", toolsInfo: { magnifier: "اللسان يبدو أحمر اللون ومغطى بحليمات بارزة (لسان الفراولة)." }, choices: ["الحصبة", "الحمى القرمزية", "جدري الماء", "الوردية الطفولية", "مرض اليد والقدم والفم"], correctAnswer: "الحمى القرمزية" },
-        { level: 1, description: "سيدة عمرها 45 عاماً، بدينة، تشكو من ألم حاد في الربع العلوي الأيمن من البطن بعد وجبة دسمة.", toolsInfo: { hand: "عند وضع اليد تحت الحافة الضلعية اليمنى والطلب من المريضة أخذ نفس عميق، تتوقف عن التنفس بسبب الألم (علامة مورفي إيجابية)." }, choices: ["التهاب الكبد", "قرحة هضمية", "التهاب المرارة الحاد", "التهاب البنكرياس", "قولون عصبي"], correctAnswer: "التهاب المرارة الحاد" },
-        { level: 1, description: "شاب طويل ونحيل، شعر فجأة بألم حاد في الصدر وضيق نفس شديد.", toolsInfo: { stethoscope: "غياب أصوات التنفس في الجانب الأيمن من الصدر، مع فرط رنين عند القرع." }, choices: ["احتشاء القلب", "صمة رئوية", "استرواح الصدر التلقائي", "ذات رئة", "تشنج عضلي"], correctAnswer: "استرواح الصدر التلقائي" },
-        { level: 1, description: "مريض سكري معروف، لم يأخذ جرعة الأنسولين، وأتى بحالة تخليط ذهني.", toolsInfo: { pen: "تفوح من فم المريض رائحة تشبه الفاكهة المتعفنة (رائحة الأسيتون)." }, choices: ["نقص سكر الدم", "غيبوبة فرط الحلولية", "الحماض الكيتوني السكري", "سكتة دماغية", "تسمم كحولي"], correctAnswer: "الحماض الكيتوني السكري" },
-        // --- المستوى 2: التخصص (5 أسئلة) ---
-        { level: 2, description: "مريض عمره 65 عاماً، مدخن، يشكو من ألم صدري ضاغط بدأ منذ ساعة.", toolsInfo: { pen: "الألم ينتشر للكتف الأيسر والفك. يرافقه تعرق شديد وغثيان.", stethoscope: "الأصوات القلبية مكتومة قليلاً، لا توجد نفخات واضحة." }, choices: ["تسلخ الأبهر", "صمة رئوية", "احتشاء العضلة القلبية", "التهاب التامور", "حرقة فؤاد"], correctAnswer: "احتشاء العضلة القلبية" },
-        { level: 2, description: "شابة عمرها 30 عاماً، تشكو من خفقان، فقدان وزن، وشعور دائم بالحرارة.", toolsInfo: { magnifier: "يلاحظ وجود جحوظ بسيط في العينين ورعشة ناعمة في اليدين الممدودتين.", stethoscope: "ضربات القلب سريعة ومنتظمة (110 ضربة/دقيقة)." }, choices: ["ورم القواتم", "قلق عام", "فقر الدم", "فرط نشاط الدرق (داء غريفز)", "بداية سن اليأس"], correctAnswer: "فرط نشاط الدرق (داء غريفز)" },
-        { level: 2, description: "مريض يعاني من قصور كلوي مزمن، يشكو من حكة شديدة وتشنجات في العضلات.", toolsInfo: { hand: "عند نفخ كم جهاز الضغط على ذراعه، تحدث تشنجات في يده (علامة تروسو إيجابية).", hammer: "عند نقر العصب الوجهي أمام الأذن، تحدث تقلصات في عضلات الوجه (علامة شفوستيك إيجابية)." }, choices: ["نقص صوديوم الدم", "فرط بوتاسيوم الدم", "نقص كالسيوم الدم", "فرط مغنيزيوم الدم", "نقص فوسفات الدم"], correctAnswer: "نقص كالسيوم الدم" },
-        { level: 2, description: "رجل عمره 60 عاماً، أتى بألم بطني شديد ينتشر إلى الظهر، مع غثيان وإقياء.", toolsInfo: { pen: "المريض لديه تاريخ من إدمان الكحول وحصيات المرارة.", magnifier: "توجد كدمات زرقاء حول السرة (علامة كولن)." }, choices: ["انثقاب قرحة", "التهاب البنكرياس الحاد", "انسداد الأمعاء", "احتشاء المساريقا", "أم دم أبهرية بطنية"], correctAnswer: "التهاب البنكرياس الحاد" },
-        { level: 2, description: "مريضة شابة لديها تاريخ من الإجهاضات المتكررة، أتت بجلطة وريدية عميقة في الساق.", toolsInfo: { pen: "تذكر المريضة وجود طفح جلدي على وجهها عند التعرض للشمس.", magnifier: "يوجد طفح جلدي أحمر على الخدين وجسر الأنف يشبه الفراشة." }, choices: ["متلازمة أضداد الفوسفولبيد", "عوز العامل الخامس لايدن", "الذئبة الحمامية الجهازية", "فقر الدم المنجلي", "كثرة الصفيحات الأساسية"], correctAnswer: "الذئبة الحمامية الجهازية" },
-        // --- المستوى 3: النخبة (5 أسئلة) ---
-        { level: 3, description: "رجل عمره 50 عاماً، مدمن على الكحول، أتى بحالة تخليط ذهني وحركات عين غريبة.", toolsInfo: { magnifier: "يلاحظ وجود رأرأة أفقية (حركة سريعة في العينين) وشلل في عضلات العين الخارجية.", hammer: "عند فحص المشية، كانت مشيته رنحية (غير متوازنة) مع قاعدة عريضة." }, choices: ["سكتة دماغية", "ورم في المخ", "اعتلال دماغي كبدي", "اعتلال دماغي لفيرنيكه", "جرعة زائدة من المخدرات"], correctAnswer: "اعتلال دماغي لفيرنيكه" },
-        { level: 3, description: "مريض يشكو من نوبات صداع شديد، تعرق، وخفقان.", toolsInfo: { pen: "يذكر المريض أن هذه النوبات تحدث بشكل مفاجئ وتستمر لدقائق. ضغطه الانقباضي أثناء النوبة 220/120.", stethoscope: "لا توجد نفخات قلبية، لكن النبض سريع جداً وقوي أثناء النوبة." }, choices: ["نوبة هلع", "فرط نشاط الدرق", "ورم القواتم (Pheochromocytoma)", "صداع عنقودي", "ارتفاع ضغط الدم الأساسي"], correctAnswer: "ورم القواتم (Pheochromocytoma)" },
-        { level: 3, description: "مزارع أتى بحمى، سعال، وألم عضلي شديد، خاصة في عضلات الربلة.", toolsInfo: { pen: "يذكر أنه كان ينظف حظيرة فئران قبل أسبوع.", magnifier: "يوجد احمرار شديد في ملتحمة العينين دون وجود قيح (احتقان الملتحمة)." }, choices: ["الإنفلونزا", "داء البريميات (Leptospirosis)", "حمى التيفوئيد", "الملاريا", "التهاب الكبد الفيروسي"], correctAnswer: "داء البريميات (Leptospirosis)" },
-        { level: 3, description: "مريض يعاني من ضعف مترقٍ يبدأ من قدميه ويتصاعد للأعلى خلال الأيام القليلة الماضية.", toolsInfo: { pen: "يذكر المريض أنه أصيب بإسهال خفيف قبل أسبوعين.", hammer: "المنعكسات الوترية العميقة غائبة تماماً في الطرفين السفليين والعلويين." }, choices: ["التصلب اللويحي", "الوهن العضلي الوبيل", "متلازمة غيلان باريه", "شلل الأطفال", "التصلب الجانبي الضموري"], correctAnswer: "متلازمة غيلان باريه" },
-        { level: 3, description: "طفل لديه بقع بنية اللون على جلده (بقع القهوة بحليب)، مع صعوبات في التعلم.", toolsInfo: { magnifier: "يوجد نمش في منطقة الإبط (علامة كرو). عند فحص العين، توجد عقيدات صغيرة بنية على القزحية (عقيدات ليش).", pen: "لدى والده نفس البقع الجلدية." }, choices: ["التصلب الحدبي", "متلازمة ستيرج ويبر", "الورم العصبي الليفي من النوع الأول", "متلازمة ماكون أولبرايت", "الجذام"], correctAnswer: "الورم العصبي الليفي من النوع الأول" }
-    ];
+    // =================================================================================
+    //                                 بنوك الأسئلة (هيكلية جديدة)
+    // =================================================================================
 
-    // --- متغيرات اللعبة ---
-    const TOOL_COST = 10;
-    const INITIAL_BUDGET = 200;
-    const REWARDS = { 1: 15, 2: 25, 3: 40 };
-    let journeyQuestions = [];
-    let currentQuestionIndex = 0;
-    let currentBudget = 0;
-    let usedTools = new Set();
+    // 1. بنك التدريب: 8 تخصصات، 3 أسئلة لكل تخصص (سهل، متوسط، صعب)
+    const trainingBank = {
+        'قلبية': [
+            { level: 'easy', case: 'مريض 60 عاماً، يعاني من ألم صدري ضاغط خلف القص.', tools: { ecg: 'ارتفاع وصلة ST في المساري السفلية.' }, choices: ['احتشاء عضلة قلبية سفلي', 'التهاب التامور', 'تسلخ الأبهر', 'قرحة هضمية'], answer: 'احتشاء عضلة قلبية سفلي' },
+            { level: 'medium', case: 'مريضة 70 عاماً، لديها قصة قصور قلب، أتت بزلة تنفسية شديدة وسعال رغوي زهري.', tools: { auscultation: 'خراخر ناعمة منتشرة في الساحتين الرئويتين.', xray: 'علامات احتقان وريدي رئوي وخطوط كيرلي B.' }, choices: ['وذمة رئة حادة قلبية المنشأ', 'نوبة ربو حادة', 'ذات رئة', 'صمة رئوية'], answer: 'وذمة رئة حادة قلبية المنشأ' },
+            { level: 'hard', case: 'رجل 65 عاماً، أتى بألم صدري حاد "كالتمزيق" ينتشر إلى الظهر بين لوحي الكتف.', tools: { inspection: 'الضغط الشرياني في الذراع اليمنى (180/100) أعلى بكثير من اليسرى (110/70).', xray: 'توسع في المنصف.' }, choices: ['تسلخ الأبهر', 'احتشاء عضلة قلبية', 'صمة رئوية', 'التهاب التامور'], answer: 'تسلخ الأبهر', dangerousTool: 'palpation' }
+        ],
+        'غدية': [
+            { level: 'easy', case: 'شابة 25 عاماً، تشكو من خسارة وزن رغم شهيتها الجيدة وخفقان.', tools: { inspection: 'جحوظ عينين واضح.' }, choices: ['داء غريفز (فرط درق)', 'قصور درق', 'داء كوشينغ', 'ورم قواتم'], answer: 'داء غريفز (فرط درق)' },
+            { level: 'medium', case: 'مريض 45 عاماً، يشكو من زيادة وزن متركزة في الجذع، مع وجه بدري.', tools: { inspection: 'وجود فزر بنفسجية على البطن.', labs: 'ارتفاع سكر الدم.' }, choices: ['داء كوشينغ', 'قصور درق', 'متلازمة الأيض', 'ضخامة نهايات'], answer: 'داء كوشينغ' },
+            { level: 'hard', case: 'مريضة فاقدة للوعي، تفوح من فمها رائحة تشبه الفاكهة (الأسيتون).', tools: { labs: 'سكر دم 550 مغ/دل، وجود كيتونات في البول والدم، حماض استقلابي.', history: 'مريضة سكري من النمط الأول غير ملتزمة بالعلاج.' }, choices: ['حماض كيتوني سكري (DKA)', 'صدمة نقص سكر الدم', 'غيبوبة فرط أسمولية', 'حماض لاكتيكي'], answer: 'حماض كيتوني سكري (DKA)' }
+        ],
+        // يمكنك إضافة بقية التخصصات الستة هنا بنفس البنية (3 أسئلة لكل تخصص)
+        'عصبية': [
+            { level: 'easy', case: 'رجل 70 عاماً، يعاني من ضعف مفاجئ في الطرفين الأيمنين.', tools: { inspection: 'تدلي زاوية الفم اليمنى.' }, choices: ['جلطة دماغية (CVA)', 'نزف تحت عنكبوتي', 'نوبة صرع', 'ورم دماغي'], answer: 'جلطة دماغية (CVA)' },
+            { level: 'medium', case: 'شاب 30 عاماً، يشكو من صداع شديد مفاجئ يصفه بأنه "أسوأ صداع في حياته".', tools: { inspection: 'المريض يبدو متهيجا وغير مرتاح للضوء (رهاب الضوء).', palpation: 'تصلب في عضلات الرقبة (صلابة نقرة).' }, choices: ['نزف تحت العنكبوتية (SAH)', 'التهاب سحايا', 'شقيقة حادة', 'ورم دماغي'], answer: 'نزف تحت العنكبوتية (SAH)' },
+            { level: 'hard', case: 'شابة 28 عاماً، تشكو من نوب متكررة من الاضطرابات العصبية التي تأتي وتذهب، تشمل تخديراً وضعفاً بصرياً.', tools: { history: 'الأعراض تفاقمت بعد حمام ساخن (ظاهرة أوتهوف).', reflexes: 'منعكسات مشتدة وعلامة بابنسكي إيجابية خلال النوبة.' }, choices: ['تصلب لويحي (MS)', 'ذئبة حمامية جهازية', 'داء لايم', 'نقص فيتامين ب12'], answer: 'تصلب لويحي (MS)' }
+        ],
+        'هضمية': [
+            { level: 'easy', case: 'شاب 20 عاماً، يشكو من ألم بطني توضع في الحفرة الحرقفية اليمنى.', tools: { palpation: 'إيلام في نقطة ماكبرني.' }, choices: ['التهاب زائدة دودية حاد', 'التهاب رتوج', 'حصيات كلوية', 'التهاب أمعاء'], answer: 'التهاب زائدة دودية حاد' },
+            { level: 'medium', case: 'رجل 50 عاماً، مدمن على الكحول، أتى بألم شرسوفي حاد ينتشر للظهر.', tools: { labs: 'ارتفاع شديد في الأميلاز والليبار المصلي.', history: 'الألم يزداد بعد الطعام.' }, choices: ['التهاب بنكرياس حاد', 'قرحة هضمية منثقبة', 'احتشاء عضلة قلبية سفلي', 'مغص مراري'], answer: 'التهاب بنكرياس حاد' },
+            { level: 'hard', case: 'مريض 60 عاماً، لديه قصة تشمع كبد، أتى بحالة من التخليط الذهني مع "رفة خافقة" في اليدين.', tools: { labs: 'ارتفاع الأمونيا في الدم.', inspection: 'يرقان، حبن، وعلامات أخرى لقصور الكبد.' }, choices: ['اعتلال دماغي كبدي', 'نزف دوالي', 'متلازمة كبدية كلوية', 'ورم في الدماغ'], answer: 'اعتلال دماغي كبدي' }
+        ],
+        // سيتم إضافة التخصصات الأربعة المتبقية بنفس الطريقة
+    };
 
-    // --- عناصر الواجهة ---
-    const startButton = document.getElementById('start-button');
-    const restartButton = document.getElementById('restart-button');
-    const diagnoseButton = document.getElementById('diagnose-button');
-    const progressDisplay = document.getElementById('progress');
-    const budgetDisplay = document.getElementById('budget');
-    const caseDescription = document.getElementById('case-description');
-    const infoBoard = document.getElementById('info-board');
-    const choicesContainer = document.getElementById('choices-container');
-    const gameOverTitle = document.getElementById('game-over-title');
-    const gameOverReason = document.getElementById('game-over-reason');
-    const gameOverScreen = document.getElementById('game-over-screen');
-    const tools = document.querySelectorAll('.tool');
+    // 2. بنك التحدي: مقسم حسب الصعوبة (60 سؤالاً افتراضياً، سنضع 9 كبداية)
+    const challengeBank = {
+        easy: [
+            { id: 'C-EASY-1', case: 'مريض أتى بألم وحرقة خلف القص يزداد بالانحناء ليلاً.', tools: { history: 'يتحسن بمضادات الحموضة.' }, choices: ['القلس المعدي المريئي (GERD)', 'احتشاء عضلة قلبية', 'تشنج مريء', 'قرحة هضمية'], answer: 'القلس المعدي المريئي (GERD)' },
+            { id: 'C-EASY-2', case: 'شاب لديه سيلان أنف، عطاس، وحكة في العينين كل ربيع.', tools: { inspection: 'هالات سوداء تحت العينين (Allergic shiners).' }, choices: ['التهاب أنف تحسسي', 'زكام عادي', 'التهاب جيوب', 'ربو'], answer: 'التهاب أنف تحسسي' },
+            { id: 'C-EASY-3', case: 'مريضة تشكو من ألم بطني تشنجي يتحسن بعد التغوط، مع تبادل بين الإمساك والإسهال.', tools: { history: 'الأعراض تزداد مع التوتر النفسي.' }, choices: ['متلازمة القولون المتهيج (IBS)', 'داء كرون', 'التهاب قولون قرحي', 'حساسية قمح'], answer: 'متلازمة القولون المتهيج (IBS)' },
+        ],
+        medium: [
+            { id: 'C-MED-1', case: 'مريض مسن، غير متحرك، أتى بتورم وألم واحمرار في ساق واحدة فقط.', tools: { inspection: 'الساق المصابة أشد حرارة وأكبر محيطاً من الأخرى.', history: 'علامة هومان إيجابية (ألم في ربلة الساق عند عطف القدم الظهري).' }, choices: ['خثار وريدي عميق (DVT)', 'التهاب هيج', 'وذمة لمفية', 'تمزق عضلي'], answer: 'خثار وريدي عميق (DVT)' },
+            { id: 'C-MED-2', case: 'مريض لديه قصة خثار وريدي عميق، تطورت لديه فجأة زلة تنفسية وألم صدري طاعن.', tools: { ecg: 'علامة S1Q3T3 الكلاسيكية.', labs: 'ارتفاع في الـ D-dimer.' }, choices: ['صمة رئوية', 'احتشاء عضلة قلبية', 'ريح صدرية', 'ذات رئة'], answer: 'صمة رئوية' },
+            { id: 'C-MED-3', case: 'رجل 40 عاماً، يشكو من ضعف تدريجي متصاعد ومتناظر في الأطراف بدأ من القدمين.', tools: { history: 'كان لديه إسهال شديد قبل أسبوعين.', reflexes: 'غياب المنعكسات الوترية العميقة.' }, choices: ['متلازمة غيلان باريه', 'تصلب لويحي', 'وهن عضلي وبيل', 'شلل أطفال'], answer: 'متلازمة غيلان باريه' },
+        ],
+        hard: [
+            { id: 'C-HARD-1', case: 'مريض يشكو من صداع، ألم في الفك عند المضغ، واضطراب في الرؤية بعين واحدة.', tools: { labs: 'ارتفاع شديد في سرعة التثفل (ESR).', palpation: 'إيلام عند جس الشريان الصدغي.' }, choices: ['التهاب الشريان ذو الخلايا العرطلة', 'ألم عصب مثلث التوائم', 'صداع عنقودي', 'زرق حاد'], answer: 'التهاب الشريان ذو الخلايا العرطلة', nextStep: { question: 'ما هو الإجراء الفوري الأكثر أهمية؟', choices: ['بدء جرعة عالية من الستيروئيدات فوراً', 'أخذ خزعة من الشريان الصدغي', 'إجراء تصوير بالرنين المغناطيسي', 'إعطاء مسكنات ألم'], answer: 'بدء جرعة عالية من الستيروئيدات فوراً' } },
+            { id: 'C-HARD-2', case: 'مريض لديه حمى، طفح جلدي راحي أخمصي، ونفخة قلبية جديدة.', tools: { history: 'المريض مدمن مخدرات وريدية.', labs: 'زرع الدم إيجابي للعنقوديات المذهبة.' }, choices: ['التهاب شغاف إنتاني', 'حمى رثوية', 'داء كاواساكي', 'زهري ثانوي'], answer: 'التهاب شغاف إنتاني' },
+            { id: 'C-HARD-3', case: 'مريض أتى بألم بطني، يرقان، وحمى مع نوافض (عرواءات).', tools: { history: 'لديه قصة حصيات مرارية.', labs: 'ارتفاع البيليروبين المباشر والـ ALP و GGT.' }, choices: ['التهاب الطرق الصفراوية الصاعد (ثالوث شاركو)', 'التهاب مرارة حاد', 'التهاب كبد فيروسي', 'سرطان رأس البنكرياس'], answer: 'التهاب الطرق الصفراوية الصاعد (ثالوث شاركو)' },
+        ]
+    };
 
-    // --- دوال اللعبة ---
-    function showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
+    // =================================================================================
+    //                               عناصر الواجهة
+    // =================================================================================
+    // (هذا الجزء مطابق للكود السابق، يربط متغيرات جافاسكريبت بعناصر HTML)
+    const screens = {
+        start: document.getElementById('start-screen'),
+        modeSelection: document.getElementById('mode-selection-screen'),
+        specialtySelection: document.getElementById('specialty-selection-screen'),
+        game: document.getElementById('game-screen'),
+        lose: document.getElementById('lose-screen'),
+        win: document.getElementById('win-screen'),
+        // تم تعديل اسم لوحة الصدارة إلى لوحة الإحصائيات الشخصية
+        stats: document.getElementById('stats-screen'), // اسم جديد
+    };
+
+    const buttons = {
+        startGame: document.getElementById('start-game-btn'),
+        trainingMode: document.getElementById('training-mode-btn'),
+        grandRound: document.getElementById('grand-round-btn'),
+        restartGrandRound: document.getElementById('restart-grand-round-btn'),
+        backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
+        backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
+        // تم تعديل أزرار لوحة الصدارة
+        showStats: document.getElementById('stats-btn-main'), // اسم جديد
+        backToMainMenuStats: document.getElementById('back-to-main-menu-stats'), // اسم جديد
+    };
+
+    const gameElements = {
+        budgetDisplay: document.getElementById('budget-display'),
+        questionCounter: document.getElementById('question-counter'),
+        timerDisplay: document.getElementById('timer-display'),
+        caseTitle: document.getElementById('case-title'),
+        caseDescription: document.getElementById('case-description'),
+        patientFileContent: document.getElementById('file-content'),
+        diagnosticTools: document.getElementById('diagnostic-tools'),
+        assistanceTools: document.getElementById('assistance-tools'),
+        choicesContainer: document.getElementById('choices-container'),
+    };
+    
+    // شاشة الإحصائيات الشخصية
+    const statsElements = {
+        bestPercentage: document.getElementById('best-percentage'),
+        totalAttempts: document.getElementById('total-attempts-stats'),
+        highestStage: document.getElementById('highest-stage'),
+        recentHistory: document.getElementById('recent-history-list'),
+    };
+
+    const modal = {
+        element: document.getElementById('modal'),
+        title: document.getElementById('modal-title'),
+        text: document.getElementById('modal-text'),
+        closeBtn: document.querySelector('.close-btn'),
+    };
+
+    // =================================================================================
+    //                                متغيرات حالة اللعبة
+    // =================================================================================
+    let currentScreen = 'start';
+    let gameState = {};
+    // بيانات الإحصائيات الشخصية
+    let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
+        bestPercentage: 0,
+        totalAttempts: 0,
+        highestStage: '0 / 15',
+        recentHistory: []
+    };
+    let timerInterval;
+
+    // =================================================================================
+    //                                وظائف التحكم بالواجهة
+    // =================================================================================
+
+    function showScreen(screenName) {
+        Object.values(screens).forEach(screen => screen.classList.remove('active'));
+        screens[screenName].classList.add('active');
+        currentScreen = screenName;
     }
 
-    function setupJourney() {
-        journeyQuestions = [];
-        [1, 2, 3].forEach(level => {
-            const questionsOfLevel = allQuestions.filter(q => q.level === level);
-            // خلط الأسئلة داخل كل مستوى
-            const shuffled = questionsOfLevel.sort(() => 0.5 - Math.random());
-            // أخذ 5 أسئلة من كل مستوى
-            journeyQuestions.push(...shuffled.slice(0, 5));
-        });
+    function showModal(title, text) {
+        modal.title.textContent = title;
+        modal.text.innerHTML = text; // Use innerHTML to allow for bold tags etc.
+        modal.element.style.display = 'flex';
     }
 
-    function startGame() {
-        setupJourney();
-        currentQuestionIndex = 0;
-        currentBudget = INITIAL_BUDGET;
-        loadQuestion(journeyQuestions[0]);
-        showScreen('game-screen');
-    }
-
-    function loadQuestion(question) {
-        usedTools.clear();
-        budgetDisplay.textContent = currentBudget;
-        progressDisplay.textContent = `${currentQuestionIndex + 1}/${journeyQuestions.length}`;
-        caseDescription.textContent = question.description;
-        infoBoard.innerHTML = '';
-        tools.forEach(t => t.style.display = 'flex');
-    }
-
-    function useTool(toolName) {
-        if (usedTools.has(toolName)) return;
-        if (currentBudget < TOOL_COST) {
-            alert("ميزانيتك لا تسمح!");
-            return;
+    modal.closeBtn.onclick = () => modal.element.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal.element) {
+            modal.element.style.display = 'none';
         }
+    };
 
-        currentBudget -= TOOL_COST;
-        budgetDisplay.textContent = currentBudget;
-        usedTools.add(toolName);
-
-        const question = journeyQuestions[currentQuestionIndex];
-        const info = question.toolsInfo[toolName];
-        const infoCard = document.createElement('div');
-        infoCard.className = 'info-card';
-        const toolIcon = document.querySelector(`.tool[data-tool="${toolName}"]`).textContent.replace(/-10|\w+/g, '').trim();
-        
-        if (info) {
-            infoCard.textContent = `[${toolIcon}] ${info}`;
-        } else {
-            infoCard.textContent = `[${toolIcon}] لا توجد معلومات مفيدة من هذا الفحص.`;
-            infoCard.style.borderColor = '#c53030';
-        }
-        infoBoard.appendChild(infoCard);
-        document.querySelector(`.tool[data-tool="${toolName}"]`).style.display = 'none';
-    }
-
-    function showDiagnosisScreen() {
-        const question = journeyQuestions[currentQuestionIndex];
-        choicesContainer.innerHTML = '';
-        const shuffledChoices = [...question.choices].sort(() => Math.random() - 0.5);
-        shuffledChoices.forEach(choice => {
-            const button = document.createElement('button');
-            button.className = 'choice-button';
-            button.textContent = choice;
-            button.onclick = () => checkAnswer(choice);
-            choicesContainer.appendChild(button);
-        });
-        showScreen('diagnosis-screen');
-    }
-
-    function checkAnswer(selectedChoice) {
-        const question = journeyQuestions[currentQuestionIndex];
-        if (selectedChoice === question.correctAnswer) {
-            // إجابة صحيحة
-            const reward = REWARDS[question.level];
-            currentBudget += reward;
-            currentQuestionIndex++;
-
-            if (currentQuestionIndex < journeyQuestions.length) {
-                alert(`تشخيص صحيح! تمت إضافة ${reward} نقطة لميزانيتك.`);
-                loadQuestion(journeyQuestions[currentQuestionIndex]);
-                showScreen('game-screen');
-            } else {
-                gameOver(`تهانينا! لقد أكملت رحلة المشخّص بنجاح! نتيجتك النهائية: ${currentBudget} نقطة.`, true);
-            }
-        } else {
-            // إجابة خاطئة
-            gameOver(`تشخيص خاطئ! الإجابة الصحيحة كانت: "${question.correctAnswer}"`, false);
-        }
-    }
-
-    function gameOver(reason, isWin) {
-        gameOverTitle.textContent = isWin ? "لقد فزت!" : "لقد خسرت!";
-        gameOverReason.textContent = reason;
-        gameOverScreen.className = `screen active ${isWin ? 'win' : 'loss'}`;
-        showScreen('game-over-screen');
-    }
-
-    // --- ربط الأحداث ---
-    startButton.addEventListener('click', startGame);
-    restartButton.addEventListener('click', startGame);
-    diagnoseButton.addEventListener('click', showDiagnosisScreen);
-    tools.forEach(toolEl => {
-        toolEl.addEventListener('click', () => useTool(toolEl.dataset.tool));
-    });
+    // --- نهاية القسم الأول ---
 });
-            
+// --- بداية القسم الثاني ---
+
+// =================================================================================
+//                                وظائف إعداد اللعبة
+// =================================================================================
+
+function setupSpecialtySelection() {
+    const specialtyGrid = document.getElementById('specialty-grid');
+    specialtyGrid.innerHTML = '';
+    // ملاحظة: يجب أن تتطابق الأسماء هنا مع مفاتيح كائن trainingBank
+    const specialties = {
+        'قلبية': '❤️', 'غدية': '💧', 'عصبية': '🧠', 'هضمية': '🍕',
+        'بولية': '🚽', 'دموية': '🩸', 'صدرية': '🫁', 'رثوية': '🦴'
+    };
+    for (const specialty in specialties) {
+        // تأكد من أن التخصص موجود في بنك الأسئلة قبل عرضه
+        if (trainingBank[specialty]) {
+            const card = document.createElement('div');
+            card.className = 'specialty-card';
+            card.dataset.specialty = specialty;
+            card.innerHTML = `<div class="specialty-icon">${specialties[specialty]}</div><h4>${specialty}</h4>`;
+            card.onclick = () => startTraining(specialty);
+            specialtyGrid.appendChild(card);
+        }
+    }
+    const backBtn = document.createElement('button');
+    backBtn.className = 'back-to-mode-selection-btn secondary-btn';
+    backBtn.textContent = 'العودة';
+    backBtn.onclick = () => showScreen('modeSelection');
+    specialtyGrid.appendChild(backBtn);
+}
+
+function startTraining(specialty) {
+    // جلب الأسئلة الثلاثة للتخصص المحدد وترتيبها حسب الصعوبة
+    const questions = [...trainingBank[specialty]].sort((a, b) => {
+        const order = { easy: 1, medium: 2, hard: 3 };
+        return order[a.level] - order[b.level];
+    });
+
+    gameState = {
+        mode: 'training',
+        questions: questions,
+        currentQuestionIndex: 0,
+        budget: 150, // ميزانية أقل للتدريب
+        usedToolsCount: 0,
+        specialty: specialty,
+    };
+    setupQuestion();
+    showScreen('game');
+    showModal('بدء التدريب', `أنت الآن في مناوبة <b>${specialty}</b>. ستواجه 3 حالات بصعوبة متدرجة. الخطأ لن ينهي اللعبة، لكنه سيكلفك 25 نقطة. بالتوفيق!`);
+}
+
+function startGrandRound() {
+    // زيادة عداد المحاولات وحفظه
+    personalStats.totalAttempts++;
+    saveStats();
+
+    // بناء الجولة الكبرى: 15 سؤالاً (5 سهل، 5 متوسط، 5 صعب)
+    let grandRoundQuestions = [];
+
+    // 1. اسحب 5 أسئلة سهلة عشوائياً
+    const easyQuestions = shuffleArray([...challengeBank.easy]).slice(0, 5);
+    // 2. اسحب 5 أسئلة متوسطة عشوائياً
+    const mediumQuestions = shuffleArray([...challengeBank.medium]).slice(0, 5);
+    // 3. اسحب 5 أسئلة صعبة عشوائياً
+    const hardQuestions = shuffleArray([...challengeBank.hard]).slice(0, 5);
+
+    // 4. ادمجها بالترتيب: السهل أولاً، ثم المتوسط، ثم الصعب
+    grandRoundQuestions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+
+    // تأكد من وجود 15 سؤالاً، إذا كان البنك أصغر، استخدم ما هو متاح
+    if (grandRoundQuestions.length < 1) {
+        showModal('خطأ', 'بنك أسئلة التحدي فارغ. لا يمكن بدء الجولة الكبرى.');
+        return;
+    }
+
+    gameState = {
+        mode: 'grand_round',
+        questions: grandRoundQuestions,
+        currentQuestionIndex: 0,
+        budget: 200,
+        usedToolsCount: 0,
+        startTime: Date.now(), // لتسجيل وقت البدء
+    };
+    setupQuestion();
+    showScreen('game');
+    showModal('بدء الجولة الكبرى!', `هذا هو التحدي الحقيقي! ستواجه ${grandRoundQuestions.length} حالات بصعوبة متدرجة. <b>خطأ واحد يعني الخسارة الكاملة.</b> تركيزك هو مفتاح النجاح. بالتوفيق أيها المشخص المحترف!`);
+}
+
+// =================================================================================
+//                                وظائف مساعدة
+// =================================================================================
+
+/**
+ * دالة لخلط ترتيب عناصر مصفوفة بشكل عشوائي
+ * @param {Array} array المصفوفة المراد خلطها
+ * @returns {Array} مصفوفة جديدة بترتيب عشوائي
+ */
+function shuffleArray(array) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
+}
+
+/**
+ * دالة لحفظ إحصائيات اللاعب في Local Storage
+ */
+function saveStats() {
+    localStorage.setItem('personalStats', JSON.stringify(personalStats));
+}
+
+/**
+ * دالة لتحديث وعرض شاشة الإحصائيات الشخصية
+ */
+function displayStats() {
+    statsElements.bestPercentage.textContent = `${personalStats.bestPercentage}%`;
+    statsElements.totalAttempts.textContent = personalStats.totalAttempts;
+    statsElements.highestStage.textContent = personalStats.highestStage;
+
+    statsElements.recentHistory.innerHTML = '';
+    if (personalStats.recentHistory.length === 0) {
+        statsElements.recentHistory.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
+    } else {
+        // عرض آخر 5 محاولات فقط
+        personalStats.recentHistory.slice(-5).reverse().forEach(entry => {
+            const li = document.createElement('li');
+            li.textContent = `النتيجة: ${entry.percentage}% - وصلت للمرحلة: ${entry.stage}`;
+            statsElements.recentHistory.appendChild(li);
+        });
+    }
+    showScreen('stats');
+}
+
+
+// --- نهاية القسم الثاني ---
+// --- بداية القسم الثالث ---
+
+// =================================================================================
+//                                وظائف منطق اللعبة
+// =================================================================================
+
+function setupQuestion() {
+    // إعادة تعيين الواجهة للسؤال الجديد
+    gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
+    document.querySelectorAll('.tool, .assist-tool').forEach(t => {
+        t.classList.remove('used');
+        t.disabled = false;
+    });
+
+    const question = gameState.questions[gameState.currentQuestionIndex];
+    
+    // تحديث العرض
+    gameElements.budgetDisplay.textContent = gameState.budget;
+    gameElements.questionCounter.textContent = `${gameState.currentQuestionIndex + 1} / ${gameState.questions.length}`;
+    gameElements.caseTitle.textContent = `الحالة رقم #${gameState.currentQuestionIndex + 1} (صعوبة: ${question.level || 'غير محدد'})`;
+    gameElements.caseDescription.textContent = question.case;
+
+    // إعداد الخيارات
+    gameElements.choicesContainer.innerHTML = '';
+    const shuffledChoices = shuffleArray([...question.choices]);
+    shuffledChoices.forEach(choice => {
+        const button = document.createElement('button');
+        button.className = 'choice-btn';
+        button.textContent = choice;
+        button.onclick = () => checkAnswer(choice);
+        gameElements.choicesContainer.appendChild(button);
+    });
+}
+
+function useTool(toolElement) {
+    if (toolElement.classList.contains('used')) return;
+
+    const toolName = toolElement.dataset.tool;
+    const cost = parseInt(toolElement.dataset.cost);
+
+    if (gameState.budget < cost) {
+        showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
+        return;
+    }
+
+    updateBudget(-cost);
+    gameState.usedToolsCount++;
+    toolElement.classList.add('used');
+    toolElement.disabled = true;
+
+    const question = gameState.questions[gameState.currentQuestionIndex];
+
+    // التحقق من الأداة الخطرة في الجولة الكبرى
+    if (gameState.mode === 'grand_round' && question.dangerousTool === toolName) {
+        loseGame(`لقد استخدمت أداة خطرة (${toolElement.innerText}) في هذا السياق، مما أدى إلى تدهور حاد في حالة المريض. التشخيص الصحيح كان: ${question.answer}`);
+        return;
+    }
+
+    const info = question.tools[toolName];
+    if (info) {
+        addInfoToPatientFile(info, toolElement.innerText);
+    } else {
+        addInfoToPatientFile('لا توجد معلومات مفيدة من هذه الأداة لهذه الحالة.', toolElement.innerText);
+    }
+}
+
+function useAssistTool(toolElement) {
+    if (toolElement.classList.contains('used')) return;
+    
+    const cost = parseInt(toolElement.dataset.cost);
+    if (gameState.budget < cost) {
+        showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
+        return;
+    }
+    
+    updateBudget(-cost);
+    toolElement.classList.add('used');
+    toolElement.disabled = true;
+    
+    const question = gameState.questions[gameState.currentQuestionIndex];
+    
+    if (toolElement.id === 'consultation-tool') {
+        // إزالة إجابتين خاطئتين
+        let wrongChoices = question.choices.filter(c => c !== question.answer);
+        wrongChoices = shuffleArray(wrongChoices).slice(0, 2);
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            if (wrongChoices.includes(btn.textContent)) {
+                btn.style.display = 'none';
+            }
+        });
+        showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
+    } else if (toolElement.id === 'brainstorm-tool') {
+        const choicesList = question.choices.map(c => `<li>${c}</li>`).join('');
+        showModal('🧠 عصف ذهني', `التشخيصات التفريقية المحتملة لهذه الحالة هي:<ul>${choicesList}</ul>`);
+    }
+}
+
+function addInfoToPatientFile(info, toolName) {
+    if (gameElements.patientFileContent.querySelector('.placeholder')) {
+        gameElements.patientFileContent.innerHTML = '';
+    }
+    const infoCard = document.createElement('div');
+    infoCard.className = 'info-card';
+    infoCard.innerHTML = `<strong>${toolName}:</strong> ${info}`;
+    gameElements.patientFileContent.appendChild(infoCard);
+}
+
+function updateBudget(amount) {
+    gameState.budget += amount;
+    gameElements.budgetDisplay.textContent = gameState.budget;
+}
+
+function checkAnswer(selectedAnswer) {
+    const question = gameState.questions[gameState.currentQuestionIndex];
+    if (selectedAnswer === question.answer) {
+        // إجابة صحيحة
+        const reward = 15;
+        updateBudget(reward);
+        
+        // التحقق من وجود خطوة تالية (للحالات المعقدة)
+        if (question.nextStep && !gameState.nextStepCompleted) {
+            showModal('تشخيص أولي صحيح!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة. لكن هذه الحالة معقدة وتتطلب قراراً إضافياً.`);
+            gameState.nextStepCompleted = true; // لمنع تكرار الخطوة
+            // تحويل السؤال إلى الخطوة التالية
+            question.case = question.nextStep.question;
+            question.choices = question.nextStep.choices;
+            question.answer = question.nextStep.answer;
+            // إعادة إعداد السؤال بنفس الحالة ولكن بالمعلومات الجديدة
+            setTimeout(setupQuestion, 2000);
+        } else {
+            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
+            setTimeout(nextQuestion, 1500);
+        }
+
+    } else {
+        // إجابة خاطئة
+        if (gameState.mode === 'grand_round') {
+            loseGame(`إجابة خاطئة. التشخيص الصحيح كان: ${question.answer}`);
+        } else {
+            // وضع التدريب
+            const penalty = 25;
+            updateBudget(-penalty);
+            showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة كعقوبة. تعلم من الخطأ وانتقل للحالة التالية.`);
+            setTimeout(nextQuestion, 2500);
+        }
+    }
+}
+
+function nextQuestion() {
+    gameState.currentQuestionIndex++;
+    // إعادة تعيين حالة الخطوة التالية للسؤال القادم
+    delete gameState.nextStepCompleted;
+
+    if (gameState.currentQuestionIndex >= gameState.questions.length) {
+        // انتهاء اللعبة
+        if (gameState.mode === 'grand_round') {
+            winGame();
+        } else {
+            showModal('التدريب انتهى!', `لقد أكملت مناوبة <b>${gameState.specialty}</b> بنجاح. نتيجتك التدريبية هي ${gameState.budget} نقطة. يمكنك الآن العودة واختيار مناوبة أخرى أو تجربة الجولة الكبرى.`);
+            showScreen('modeSelection');
+        }
+    } else {
+        setupQuestion();
+    }
+}
+
+function loseGame(reason) {
+    updateStatsOnFinish(false); // تحديث الإحصائيات عند الخسارة
+    document.getElementById('lose-reason').textContent = reason;
+    showScreen('lose');
+}
+
+function winGame() {
+    updateStatsOnFinish(true); // تحديث الإحصائيات عند الفوز
+    showScreen('win');
+}
+
+function updateStatsOnFinish(isWin) {
+    const finalScore = gameState.budget;
+    const stageReached = isWin ? gameState.questions.length : gameState.currentQuestionIndex;
+    const totalStages = gameState.questions.length;
+    
+    // معادلة حساب مؤشر الكفاءة
+    // 60% من النتيجة، 40% من التقدم في المراحل
+    let efficiency = ((finalScore / 200) * 60) + ((stageReached / totalStages) * 40);
+    efficiency = Math.max(0, Math.min(100, efficiency)).toFixed(0);
+
+    // تحديث أفضل نتيجة
+    if (efficiency > personalStats.bestPercentage) {
+        personalStats.bestPercentage = efficiency;
+    }
+
+    // تحديث أعلى مرحلة تم الوصول إليها
+    const currentHighestStage = parseInt(personalStats.highestStage.split(' ')[0]);
+    if (stageReached > currentHighestStage) {
+        personalStats.highestStage = `${stageReached} / ${totalStages}`;
+    }
+
+    // إضافة المحاولة الحالية إلى السجل
+    personalStats.recentHistory.push({
+        percentage: efficiency,
+        stage: `${stageReached} / ${totalStages}`
+    });
+    // الحفاظ على آخر 5 محاولات فقط
+    if (personalStats.recentHistory.length > 5) {
+        personalStats.recentHistory.shift();
+    }
+
+    saveStats(); // حفظ كل الإحصائيات المحدثة
+
+    // عرض النتائج في شاشة الفوز/الخسارة
+    if (isWin) {
+        document.getElementById('final-score').textContent = finalScore;
+        document.getElementById('final-percentage-display').textContent = `${efficiency}%`;
+    }
+}
+
+
+// =================================================================================
+//                                إعداد مستمعي الأحداث
+// =================================================================================
+
+function setupEventListeners() {
+    buttons.startGame.onclick = () => showScreen('modeSelection');
+    buttons.trainingMode.onclick = () => {
+        setupSpecialtySelection();
+        showScreen('specialtySelection');
+    };
+    buttons.grandRound.onclick = startGrandRound;
+    
+    buttons.restartGrandRound.onclick = startGrandRound;
+    buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
+    buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
+
+    buttons.showStats.onclick = displayStats;
+    buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
+
+    // ربط وظائف الأدوات بالأزرار
+    document.querySelectorAll('.tool').forEach(tool => {
+        tool.onclick = () => useTool(tool);
+    });
+    document.querySelectorAll('.assist-tool').forEach(tool => {
+        tool.onclick = () => useAssistTool(tool);
+    });
+}
+
+// =================================================================================
+//                                نقطة انطلاق التطبيق
+// =================================================================================
+setupEventListeners();
+showScreen('start');
+showModal('مرحباً بك في منصة المشخص المحترف!', 'هذه المنصة مصممة لصقل مهاراتك السريرية. اختر "وضع التدريب" لمراجعة التخصصات، أو "الجولة الكبرى" لاختبار معرفتك في تحدٍ حقيقي. بالتوفيق!');
+
+
+// --- نهاية القسم الثالث ---
+});
