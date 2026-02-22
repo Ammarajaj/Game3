@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         game: document.getElementById('game-screen'),
         lose: document.getElementById('lose-screen'),
         win: document.getElementById('win-screen'),
+        hacking: document.getElementById('hacking-screen'), // ✨ إضافة شاشة التهكير
     };
     const buttons = {
         startGame: document.getElementById('start-game-btn'),
@@ -66,52 +67,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- وظائف التحكم بالواجهة ---
 
-    // =================================================================================
-    // ✨ تم تحديث دالة showScreen لتكون أبسط وأكثر فعالية
-    // =================================================================================
     function showScreen(screenName) {
         currentScreenName = screenName;
         
-        // إخفاء كل الشاشات أولاً
         Object.values(screens).forEach(screen => screen.classList.remove('active'));
         statsPage.classList.remove('active');
 
-        // إظهار الشاشة المطلوبة
         const targetScreen = screens[screenName] || (screenName === 'statistics' ? statsPage : null);
         if (targetScreen) {
             targetScreen.classList.add('active');
         }
 
-        // تحديث سجل المتصفح فقط إذا كانت الحالة الجديدة مختلفة
         if (history.state?.screen !== screenName) {
             history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
         }
     }
 
-    // =================================================================================
-    // ✨ تم تحديث معالج onpopstate ليكون أكثر دقة
-    // =================================================================================
     window.onpopstate = function(event) {
-        // إذا كان المستخدم في شاشة اللعب، اظهر نافذة تأكيد
         if (currentScreenName === 'game') {
-            history.forward(); // منع الرجوع الفعلي
+            history.forward();
             showModal(
                 'تأكيد الخروج',
                 'هل أنت متأكد من رغبتك في مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.',
                 true,
                 () => {
                     clearInterval(timerInterval);
-                    showScreen('modeSelection'); // عند التأكيد، اذهب إلى شاشة اختيار الوضع
+                    showScreen('modeSelection');
                 }
             );
-            return; // إنهاء الدالة هنا
+            return;
         }
 
-        // إذا كان هناك حالة مسجلة في event.state، انتقل إليها
         if (event.state && event.state.screen) {
             showScreen(event.state.screen);
         } else {
-            // كحالة افتراضية، انتقل إلى شاشة البداية
             showScreen('start');
         }
     };
@@ -136,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- باقي دوال اللعبة (بدون تغيير) ---
+    // --- باقي دوال اللعبة ---
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -180,7 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    function startGrandRound() {
+    // ✨ تم تعديل الدالة لتقبل الميزانية
+    function startGrandRound(initialBudget = 200) {
         if (personalStats.isFirstAttempt) {
             personalStats.isFirstAttempt = false;
         }
@@ -202,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mode: 'grand_round',
             questions: questions,
             currentQuestionIndex: 0,
-            budget: 200,
+            budget: initialBudget, // ✨ استخدام الميزانية الممررة
         };
         startTimer(15 * 60, gameElements.timerDisplay);
         setupQuestion();
@@ -393,13 +383,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ✨ --- دالة تشغيل شاشة التهكير --- ✨
+    function runHackingSequence() {
+        showScreen('hacking');
+        const terminal = document.getElementById('terminal');
+        terminal.innerHTML = ''; // تنظيف الشاشة
+
+        const lines = [
+            '> Establishing connection to central server... [OK]',
+            '> Analyzing user profile... [COMPLETE]',
+            '> Skill level: Beginner',
+            '> Course history: Detected.',
+            '> WARNING: High levels of "Basmaga" detected!',
+            '> Initiating counter-protocol...',
+            '> جاري تفعيل ميزة قناص البصمجة... 🔥'
+        ];
+
+        let lineIndex = 0;
+        const interval = setInterval(() => {
+            if (lineIndex < lines.length) {
+                const p = document.createElement('p');
+                p.textContent = lines[lineIndex];
+                terminal.appendChild(p);
+                lineIndex++;
+            } else {
+                clearInterval(interval);
+                // عرض الرسائل النهائية بعد انتهاء التسلسل
+                setTimeout(() => {
+                    const finalMsg = document.createElement('p');
+                    finalMsg.className = 'final-message';
+                    finalMsg.textContent = 'تم التفعيل بنجاح! مبروك، لقد انضممت إلى مجتمع قناصي بصمجة الدورات.';
+                    terminal.appendChild(finalMsg);
+
+                    setTimeout(() => {
+                        const bonusMsg = document.createElement('p');
+                        bonusMsg.className = 'bonus-message';
+                        bonusMsg.textContent = 'وبمناسبة انضمامك، هذه 100 نقطة هدية لتبدأ بها. بالتوفيق!';
+                        terminal.appendChild(bonusMsg);
+
+                        // العودة إلى الشاشة الرئيسية بعد عرض كل شيء
+                        setTimeout(() => {
+                            showScreen('modeSelection');
+                        }, 5000); // انتظر 5 ثوانٍ قبل العودة
+
+                    }, 2000);
+
+                }, 1000);
+            }
+        }, 600); // سرعة ظهور الأسطر
+    }
+
+
     // --- نقطة الانطلاق وربط الأحداث ---
     function setupEventListeners() {
         buttons.startGame.onclick = () => showScreen('modeSelection');
         buttons.trainingMode.onclick = setupSpecialtySelection;
+        
+        // ✨ تعديل زر الجولة الكبرى لتطبيق الهدية
         buttons.grandRound.onclick = () => {
-            showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`, true, startGrandRound);
+            const rulesText = `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`;
+            showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', rulesText, true, () => {
+                const bonusClaimed = localStorage.getItem('jokeBonusClaimed') === 'true';
+                let initialBudget = 200;
+                
+                if (bonusClaimed) {
+                    initialBudget += 100;
+                    localStorage.removeItem('jokeBonusClaimed'); // استخدم الهدية مرة واحدة فقط
+                    setTimeout(() => {
+                        showModal('🎁 تم إضافة الهدية!', 'تمت إضافة 100 نقطة إلى ميزانيتك الأولية. حظًا موفقًا!');
+                    }, 500);
+                }
+                
+                startGrandRound(initialBudget);
+            });
         };
+
         buttons.skipQuestion.onclick = skipQuestion;
         buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
@@ -413,26 +471,72 @@ document.addEventListener('DOMContentLoaded', () => {
         
         modal.closeBtn.onclick = () => modal.element.style.display = 'none';
         window.onclick = (event) => { if (event.target == modal.element) modal.element.style.display = 'none'; };
+
+        // ✨ --- منطق المزحة الكامل --- ✨
+        const jokeContainer = document.getElementById('joke-container');
+        let jokeStage = 0;
+
+        const setupJokeButton = () => {
+            let btnText, modalTitle, modalText, nextStageAction;
+
+            switch (jokeStage) {
+                case 0:
+                    btnText = 'إذا كنت دارس دورات اضغط هنا';
+                    modalTitle = '🤨';
+                    modalText = 'هههههه دارس دورات وبدك تشخص حالات سريرية؟';
+                    nextStageAction = () => { jokeStage = 1; setupJokeButton(); };
+                    break;
+                case 1:
+                    btnText = 'كنت أمزح معك، اضغط هنا';
+                    modalTitle = '🤔';
+                    modalText = 'ههههههه شو صدقت حالك بـ الدورات رح تشخص؟';
+                    nextStageAction = () => { jokeStage = 2; setupJokeButton(); };
+                    break;
+                case 2:
+                    btnText = 'امزح معك أصلاً! اضغط هنا مجهزلك مفاجأة';
+                    modalTitle = '🎁';
+                    modalText = 'هههههههههههههههههههههه صدقت؟ تنينا فارشين أصلاً... اضغط آخر مرة بوعدك';
+                    nextStageAction = () => {
+                        localStorage.setItem('jokeBonusClaimed', 'true');
+                        runHackingSequence(); // ✨ تشغيل شاشة التهكير
+                    };
+                    break;
+            }
+
+            jokeContainer.innerHTML = '';
+            if (jokeStage > 2) return; // توقف عن إنشاء الزر بعد المرحلة الأخيرة
+
+            const jokeBtn = document.createElement('button');
+            jokeBtn.id = 'joke-btn';
+            jokeBtn.className = 'btn-secondary';
+            jokeBtn.textContent = btnText;
+
+            jokeBtn.onclick = () => {
+                if (jokeStage < 2) {
+                    showModal(modalTitle, modalText, false);
+                    setTimeout(() => {
+                        modal.element.style.display = 'none';
+                        if (nextStageAction) nextStageAction();
+                    }, 3000);
+                } else {
+                    // للمرحلة الأخيرة، لا تظهر نافذة منبثقة، بل انتقل مباشرة
+                    if (nextStageAction) nextStageAction();
+                }
+            };
+            
+            jokeContainer.appendChild(jokeBtn);
+        };
+
+        setupJokeButton(); // بدء سلسلة المزاح
     }
 
-    // =================================================================================
-    // ✨ تم تحديث دالة بدء التشغيل لتسجيل الحالة الأولية بشكل صحيح
-    // =================================================================================
     function initializeApp() {
         setupEventListeners();
-
-        // تحديد الشاشة الأولية بناءً على الرابط (الهاش)
         const initialScreen = location.hash ? location.hash.substring(1) : 'start';
-        
-        // عرض الشاشة الأولية
         showScreen(initialScreen);
-
-        // استبدال الحالة الأولية الفارغة بحالة شاشة البداية
-        // هذا يضمن أن زر الرجوع من أي شاشة أخرى سيعود إلى شاشة البداية وليس خارج الموقع
         history.replaceState({ screen: initialScreen }, `Screen ${initialScreen}`, `#${initialScreen}`);
     }
 
-    // --- بدء تشغيل التطبيق ---
     initializeApp();
 
-}); // نهاية مستمع `DOMContentLoaded`
+});
