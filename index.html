@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -16,20 +16,25 @@
         <div class="container">
             <h1>منصة المشخص المحترف</h1>
             <p>أداة تفاعلية لصقل مهاراتك في التشخيص السريري.</p>
-            <button id="start-game-btn" class="btn btn-primary">ابدأ الرحلة</button>
+            <button id="start-game-btn" class="btn-primary">ابدأ الآن</button>
         </div>
     </div>
 
-    <!-- شاشة اختيار الوضع -->
+    <!-- شاشة اختيار وضع اللعب -->
     <div id="mode-selection-screen" class="screen">
         <div class="container">
             <h2>اختر وضع اللعب</h2>
-            <p>اختر "وضع التدريب" للتركيز على تخصص معين، أو "الجولة الكبرى" لتحدي حقيقي.</p>
             <div class="mode-buttons">
-                <button id="training-mode-btn" class="btn btn-secondary">📚 وضع التدريب</button>
-                <button id="grand-round-btn" class="btn btn-primary">🏆 الجولة الكبرى</button>
+                <button id="training-mode-btn" class="btn-secondary">
+                    <h3><span class="icon">🎓</span> وضع التدريب (المناوبات)</h3>
+                    <p>تدرب على حالات في تخصص معين. لا يوجد وقت محدد أو خسارة فورية.</p>
+                </button>
+                <button id="grand-round-btn" class="btn-primary">
+                    <h3><span class="icon">🏆</span> الجولة الكبرى (التحدي)</h3>
+                    <p>اختبر معرفتك في 15 حالة عشوائية. أي خطأ ينهي الجولة!</p>
+                </button>
             </div>
-            <button id="stats-btn-main" class="btn btn-tertiary">📊 عرض إحصائياتي</button>
+            <button id="stats-btn-main" class="btn-tertiary">📊 عرض إحصائياتي</button>
         </div>
     </div>
 
@@ -37,112 +42,118 @@
     <div id="specialty-selection-screen" class="screen">
         <div class="container">
             <h2>اختر مناوبة للتدريب</h2>
-            <div id="specialty-grid">
-                <!-- سيتم ملء الأزرار هنا عبر JavaScript -->
+            <div id="specialty-grid" class="specialty-grid">
+                <!-- سيتم ملء الأزرار هنا عبر جافاسكريبت -->
             </div>
         </div>
     </div>
 
     <!-- شاشة اللعب الرئيسية -->
     <div id="game-screen" class="screen">
-        <header class="game-header">
-            <div class="stat-box">
-                <span>💰 الميزانية</span>
-                <span id="budget-display">200</span>
-            </div>
-            <div class="stat-box">
-                <span>⏳ الوقت المتبقي</span>
-                <span id="timer-display">15:00</span>
-            </div>
-            <div class="stat-box">
-                <span>الحالة</span>
-                <span id="question-counter">1 / 15</span>
-            </div>
-        </header>
-        <main class="game-main">
-            <div class="case-panel">
-                <h3 id="case-title">الحالة رقم #1</h3>
-                <p id="case-description">وصف الحالة السريرية يظهر هنا...</p>
-                <div id="choices-container">
-                    <!-- أزرار الخيارات تظهر هنا -->
+        <div class="game-layout">
+            <div id="patient-file-area" class="patient-file-area">
+                <h3>ملف المريض</h3>
+                <div id="file-content" class="file-content">
+                    <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
                 </div>
             </div>
-            <div class="workspace-panel">
-                <div class="tools-section">
-                    <h4>صندوق الأدوات التشخيصية</h4>
-                    <div id="diagnostic-tools" class="tools-grid">
-                        <button class="tool" data-tool="history" data-cost="5">📜 القصة المرضية (5)</button>
-                        <button class="tool" data-tool="inspection" data-cost="5">👀 الفحص بالنظر (5)</button>
-                        <button class="tool" data-tool="palpation" data-cost="10">✋ الفحص بالجس (10)</button>
-                        <button class="tool" data-tool="percussion" data-cost="10">🤚 الفحص بالقرع (10)</button>
-                        <button class="tool" data-tool="auscultation" data-cost="10">🩺 الفحص بالإصغاء (10)</button>
-                        <button class="tool" data-tool="reflexes" data-cost="5">🔨 فحص المنعكسات (5)</button>
-                        <button class="tool" data-tool="labs" data-cost="15">🧪 تحاليل مخبرية (15)</button>
-                        <button class="tool" data-tool="xray" data-cost="20">🩻 أشعة سينية (20)</button>
-                        <button class="tool" data-tool="ecg" data-cost="15">❤️ تخطيط قلب (15)</button>
+
+            <div class="main-content">
+                <div class="game-header">
+                    <div class="header-stat">
+                        <span>الميزانية</span>
+                        <span id="budget-display">200</span>
                     </div>
-                    <h4>أدوات المساعدة</h4>
-                    <div id="assistance-tools" class="tools-grid">
-                        <button id="brainstorm-tool" class="assist-tool" data-cost="20">🧠 عصف ذهني (20)</button>
-                        <button id="consultation-tool" class="assist-tool" data-cost="30">💡 50/50 (30)</button>
+                    <div class="header-stat">
+                        <span>السؤال</span>
+                        <span id="question-counter">1 / 15</span>
+                    </div>
+                    <div class="header-stat">
+                        <span>الوقت</span>
+                        <span id="timer-display">15:00</span>
                     </div>
                 </div>
-                <div class="patient-file-section">
-                    <h4>ملف المريض</h4>
-                    <div id="file-content" class="patient-file">
-                        <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
-                    </div>
+
+                <div class="case-container">
+                    <h3 id="case-title">الحالة رقم #1</h3>
+                    <p id="case-description">مريض أتى بشكوى...</p>
+                </div>
+
+                <div class="choices-container" id="choices-container">
+                    <!-- سيتم ملء أزرار الخيارات هنا -->
                 </div>
             </div>
-        </main>
+
+            <div class="toolbox-area">
+                <h3>صندوق الأدوات</h3>
+                <div class="toolbox">
+                    <!-- أدوات التشخيص (تكلفة موحدة: 10) -->
+                    <button class="tool" data-tool="history" data-cost="10">📜 القصة المرضية</button>
+                    <button class="tool" data-tool="inspection" data-cost="10">👀 الفحص السريري</button>
+                    <button class="tool" data-tool="palpation" data-cost="10">✋ الجس</button>
+                    <button class="tool" data-tool="percussion" data-cost="10">🥁 القرع</button>
+                    <button class="tool" data-tool="auscultation" data-cost="10">🩺 التسمع</button>
+                    <button class="tool" data-tool="reflexes" data-cost="10">🔨 المنعكسات</button>
+                    <button class="tool" data-tool="labs" data-cost="10">🩸 تحاليل مخبرية</button>
+                    <button class="tool" data-tool="xray" data-cost="10">🩻 أشعة X</button>
+                    <button class="tool" data-tool="ecg" data-cost="10">❤️ تخطيط قلب</button>
+                    
+                    <!-- أدوات المساعدة (تكلفة خاصة) -->
+                    <button id="brainstorm-tool" class="assist-tool" data-cost="25">🧠 عصف ذهني</button>
+                    <button id="consultation-tool" class="assist-tool" data-cost="40">💡 استشارة (50/50)</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- شاشة الخسارة -->
-    <div id="lose-screen" class="screen result-screen">
-        <div class="container">
-            <h2>للأسف، لقد خسرت</h2>
-            <p id="lose-reason">سبب الخسارة يظهر هنا.</p>
-            <button id="restart-grand-round-btn" class="btn btn-primary">إعادة المحاولة</button>
-            <button id="back-to-main-menu-lose" class="btn btn-secondary">العودة للقائمة الرئيسية</button>
+    <div id="lose-screen" class="screen">
+        <div class="container result-screen">
+            <h2>للأسف، لقد خسرت!</h2>
+            <p id="lose-reason">إجابة خاطئة.</p>
+            <div class="result-buttons">
+                <button id="restart-grand-round-btn" class="btn-primary">إعادة المحاولة</button>
+                <button id="back-to-main-menu-lose" class="btn-secondary">القائمة الرئيسية</button>
+            </div>
         </div>
     </div>
 
     <!-- شاشة الفوز -->
-    <div id="win-screen" class="screen result-screen">
-        <div class="container">
-            <h2>🎉 تهانينا! لقد أكملت الجولة الكبرى بنجاح! 🎉</h2>
-            <p>لقد أثبتّ كفاءتك كـ "مشخص محترف".</p>
+    <div id="win-screen" class="screen">
+        <div class="container result-screen">
+            <h2>🎉 تهانينا، لقد فزت! 🎉</h2>
+            <p>لقد أثبت أنك مشخص محترف!</p>
             <div class="final-stats">
-                <p>النقاط المتبقية: <strong id="final-score"></strong></p>
-                <p>مؤشر الكفاءة: <strong id="final-percentage-display" class="highlight"></strong></p>
+                <div>النتيجة النهائية: <span id="final-score"></span> نقطة</div>
+                <div>نسبة الأداء: <span id="final-percentage-display"></span></div>
             </div>
-            <button id="back-to-main-menu-win" class="btn btn-secondary">العودة للقائمة الرئيسية</button>
+            <button id="back-to-main-menu-win" class="btn-primary">القائمة الرئيسية</button>
         </div>
     </div>
 
     <!-- شاشة الإحصائيات -->
     <div id="stats-screen" class="screen">
         <div class="container">
-            <h2>📊 سجلك الشخصي</h2>
+            <h2>📊 إحصائيات الأداء</h2>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h4>أفضل مؤشر كفاءة</h4>
-                    <p id="best-percentage" class="highlight">0%</p>
+                    <h4>أفضل نسبة أداء</h4>
+                    <p id="best-percentage">0%</p>
                 </div>
                 <div class="stat-card">
                     <h4>إجمالي المحاولات</h4>
                     <p id="total-attempts-stats">0</p>
                 </div>
                 <div class="stat-card">
-                    <h4>أعلى مرحلة وصلت إليها</h4>
+                    <h4>أعلى مرحلة تم الوصول إليها</h4>
                     <p id="highest-stage">0 / 15</p>
                 </div>
             </div>
             <h3>سجل آخر 5 محاولات</h3>
-            <ul id="recent-history-list">
-                <!-- سيتم ملؤه عبر JavaScript -->
+            <ul id="recent-history-list" class="history-list">
+                <li>لا يوجد سجل محاولات بعد.</li>
             </ul>
-            <button id="back-to-main-menu-stats" class="btn btn-secondary">العودة للقائمة الرئيسية</button>
+            <button id="back-to-main-menu-stats" class="btn-secondary">العودة</button>
         </div>
     </div>
 
@@ -150,14 +161,11 @@
     <div id="modal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h3 id="modal-title">عنوان الرسالة</h3>
-            <p id="modal-text">نص الرسالة يظهر هنا.</p>
+            <h3 id="modal-title">عنوان النافذة</h3>
+            <div id="modal-text">نص النافذة...</div>
         </div>
     </div>
 
-    <!-- ====================================================== -->
-    <!--   التعديل الأهم: استدعاء السكريبت في نهاية الصفحة   -->
-    <!-- ====================================================== -->
     <script src="script.js"></script>
 
 </body>
