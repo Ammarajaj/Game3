@@ -429,11 +429,11 @@ reserve: {
 // =================================================================================
 //                                 القسم الأول: كل المتغيرات
 // =================================================================================
+// =================================================================================
+//                                 القسم الأول: كل المتغيرات
+// =================================================================================
 
-// ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` هنا
-const trainingBank = {};
-const challengeBank = { core: { easy: [], medium: [], hard: [] }, reserve: { easy: [], medium: [], hard: [] } };
-
+// ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` التي نسختها هنا
 
 // 2. عناصر الواجهة
 const screens = {
@@ -453,7 +453,7 @@ const buttons = {
     restartGrandRound: document.getElementById('restart-grand-round-btn'),
     backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
     backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
-    showStats: document.getElementById('stats-btn-main'),
+    showStats: document.getElementById('stats-btn-main'), // <-- هذا هو السطر الذي تم تصحيحه
     backToMainMenuStats: document.getElementById('back-to-main-menu-stats'),
 };
 const gameElements = {
@@ -658,7 +658,7 @@ function setupQuestion() {
     gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
     document.querySelectorAll('.tool-item').forEach(t => {
         t.classList.remove('used');
-        t.style.display = '';
+        t.style.display = ''; // إعادة إظهار كل الأزرار
     });
     
     const question = gameState.questions[gameState.currentQuestionIndex];
@@ -857,30 +857,7 @@ function setupEventListeners() {
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
     
-    // ==================== بداية الكود التشخيصي المنبثق ====================
-    buttons.showStats.onclick = () => {
-        const title = "تشخيص خطأ: الزر لا يستجيب";
-        const explanation = `
-            <p>لقد ضغطت على زر الإحصائيات، وهذه النافذة ظهرت بدلاً من شاشة الإحصائيات لتوضيح سبب المشكلة.</p>
-            <hr>
-            <h4>السبب:</h4>
-            <p>المشكلة تكمن في طريقة استدعاء الدالة. الكود الأصلي كان هكذا:</p>
-            <code style="background: #ffebeb; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = () => displayStats;</code>
-            <p>هذا الكود يرجع "مرجعاً" للدالة، لكنه لا "ينفذها". إنه مثل إعطائك عنوان منزل بدلاً من أخذك إليه.</p>
-            
-            <h4>الحل:</h4>
-            <p>الحل هو استدعاء الدالة مباشرةً بإضافة القوسين <code>()</code> أو إسنادها مباشرة:</p>
-            <code style="background: #e6ffed; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = displayStats;</code>
-            <p>أو</p>
-            <code style="background: #e6ffed; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = () => displayStats();</code>
-            <p>هذا الكود "ينفذ" الدالة، أي أنه يأخذك فعلاً إلى المنزل.</p>
-            <hr>
-            <p>لإصلاح اللعبة، استبدل هذا الكود التشخيصي بالحل الصحيح.</p>
-        `;
-        showModal(title, explanation, false); // false لإخفاء أزرار التأكيد والإلغاء
-    };
-    // ===================== نهاية الكود التشخيصي المنبثق =====================
-
+    buttons.showStats.onclick = displayStats;
     buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
     document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
@@ -908,4 +885,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setupEventListeners();
 });
-        
+    
