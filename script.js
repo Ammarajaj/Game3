@@ -426,9 +426,16 @@ reserve: {
 
 // ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` الجديدة هنا
 // الصق المتغيرات هنا...
+// =================================================================================
+//                                 القسم الأول: كل المتغيرات
+// =================================================================================
+
+// ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` هنا
+const trainingBank = {};
+const challengeBank = { core: { easy: [], medium: [], hard: [] }, reserve: { easy: [], medium: [], hard: [] } };
 
 
-// 2. عناصر الواجهة (DOM Elements)
+// 2. عناصر الواجهة
 const screens = {
     start: document.getElementById('start-screen'),
     modeSelection: document.getElementById('mode-selection-screen'),
@@ -438,7 +445,6 @@ const screens = {
     win: document.getElementById('win-screen'),
     stats: document.getElementById('stats-screen'),
 };
-
 const buttons = {
     startGame: document.getElementById('start-game-btn'),
     trainingMode: document.getElementById('training-mode-btn'),
@@ -447,11 +453,9 @@ const buttons = {
     restartGrandRound: document.getElementById('restart-grand-round-btn'),
     backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
     backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
-    // *** تم تعريف زر الإحصائيات وزر العودة منه هنا بشكل صريح ***
     showStats: document.getElementById('stats-btn-main'),
     backToMainMenuStats: document.getElementById('back-to-main-menu-stats'),
 };
-
 const gameElements = {
     budgetDisplay: document.getElementById('budget-display'),
     questionCounter: document.getElementById('question-counter'),
@@ -461,14 +465,12 @@ const gameElements = {
     patientFileContent: document.getElementById('file-content'),
     choicesContainer: document.getElementById('choices-container'),
 };
-
 const statsElements = {
     bestPercentage: document.getElementById('best-percentage'),
     totalAttempts: document.getElementById('total-attempts-stats'),
     highestStage: document.getElementById('highest-stage'),
     recentHistory: document.getElementById('recent-history-list'),
 };
-
 const modal = {
     element: document.getElementById('modal'),
     title: document.getElementById('modal-title'),
@@ -478,12 +480,8 @@ const modal = {
     cancelBtn: document.getElementById('modal-cancel-btn'),
 };
 
-// 3. متغيرات حالة اللعبة (Game State)
+// 3. متغيرات حالة اللعبة
 let gameState = {};
-let timerInterval;
-let currentScreenName = 'start';
-
-// تحميل الإحصائيات من التخزين المحلي أو إنشاء كائن جديد إذا لم تكن موجودة
 let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     bestPercentage: 0,
     totalAttempts: 0,
@@ -491,23 +489,44 @@ let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     recentHistory: [],
     isFirstAttempt: true,
 };
-
+let timerInterval;
+let currentScreenName = 'start';
 
 // =================================================================================
 //                                 القسم الثاني: كل الدوال
 // =================================================================================
 
-// --- وظائف التحكم بالواجهة (UI Control) ---
-
-function showScreen(screenName) {
-    // إخفاء جميع الشاشات
+// --- وظائف التحكم بالواجهة (مع دعم زر الرجوع) ---
+function showScreen(screenName, isPoppingState = false) {
     Object.values(screens).forEach(screen => screen.classList.remove('active'));
-    // إظهار الشاشة المطلوبة فقط
-    if (screens[screenName]) {
-        screens[screenName].classList.add('active');
-    }
+    screens[screenName].classList.add('active');
     currentScreenName = screenName;
+
+    if (!isPoppingState) {
+        if (history.state?.screen !== screenName) {
+            history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
+        }
+    }
 }
+
+window.onpopstate = function(event) {
+    if (currentScreenName === 'game') {
+        history.forward();
+        showModal(
+            'تأكيد الخروج',
+            'هل أنت متأكد من رغبتك في مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.',
+            true,
+            () => {
+                clearInterval(timerInterval);
+                showScreen('modeSelection');
+            }
+        );
+    } else if (event.state && event.state.screen) {
+        showScreen(event.state.screen, true);
+    } else {
+        showScreen('start', true);
+    }
+};
 
 function showModal(title, text, showConfirmButtons = false, onConfirm = null) {
     modal.title.innerHTML = title;
@@ -529,47 +548,34 @@ function showModal(title, text, showConfirmButtons = false, onConfirm = null) {
     }
 }
 
-// --- وظائف الإحصائيات (Stats Functions) ---
-
-function saveStats() {
-    localStorage.setItem('personalStats', JSON.stringify(personalStats));
-}
-
-// *** دالة عرض الإحصائيات المحدثة ***
-function displayStats() {
-    // 1. تحديث عناصر الواجهة بالبيانات الحالية من متغير personalStats
-    statsElements.bestPercentage.textContent = `${personalStats.bestPercentage}%`;
-    statsElements.totalAttempts.textContent = personalStats.totalAttempts;
-    statsElements.highestStage.textContent = personalStats.highestStage;
-    
-    // 2. مسح قائمة المحاولات السابقة
-    statsElements.recentHistory.innerHTML = '';
-    
-    // 3. التحقق مما إذا كان هناك سجل محاولات
-    if (personalStats.recentHistory.length === 0) {
-        statsElements.recentHistory.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
-    } else {
-        // 4. عرض المحاولات الأخيرة (من الأحدث إلى الأقدم)
-        [...personalStats.recentHistory].reverse().forEach(attempt => {
-            const li = document.createElement('li');
-            li.innerHTML = `<span>النتيجة: <b>${attempt.percentage}%</b></span> <span>المرحلة: ${attempt.stage}</span>`;
-            statsElements.recentHistory.appendChild(li);
-        });
-    }
-    
-    // 5. إظهار شاشة الإحصائيات
-    showScreen('stats');
-}
-
-
-// --- وظائف الإعداد والتحكم (Setup & Control) ---
-
+// --- وظائف الإعداد والتحكم ---
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+function saveStats() {
+    localStorage.setItem('personalStats', JSON.stringify(personalStats));
+}
+
+function displayStats() {
+    statsElements.bestPercentage.textContent = `${personalStats.bestPercentage}%`;
+    statsElements.totalAttempts.textContent = personalStats.totalAttempts;
+    statsElements.highestStage.textContent = personalStats.highestStage;
+    statsElements.recentHistory.innerHTML = '';
+    if (personalStats.recentHistory.length === 0) {
+        statsElements.recentHistory.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
+    } else {
+        [...personalStats.recentHistory].reverse().forEach(attempt => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>النتيجة: <b>${attempt.percentage}%</b></span> <span>المرحلة: ${attempt.stage}</span>`;
+            statsElements.recentHistory.appendChild(li);
+        });
+    }
+    showScreen('stats');
 }
 
 function startTrainingMode(specialty) {
@@ -647,8 +653,7 @@ function startTimer(duration, display) {
     }, 1000);
 }
 
-// --- وظائف منطق اللعبة الفعلي (Game Logic) ---
-
+// --- وظائف منطق اللعبة الفعلي ---
 function setupQuestion() {
     gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
     document.querySelectorAll('.tool-item').forEach(t => {
@@ -829,15 +834,9 @@ function updateStatsOnFinish(isWin) {
 //                                القسم الثالث: نقطة الانطلاق
 // =================================================================================
 
-// *** دالة ربط الأحداث المحدثة والنهائية ***
 function setupEventListeners() {
-    // أزرار التنقل الرئيسية
     buttons.startGame.onclick = () => showScreen('modeSelection');
     buttons.trainingMode.onclick = setupSpecialtySelection;
-    buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
-    buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
-    
-    // زر الجولة الكبرى مع النافذة التوضيحية
     buttons.grandRound.onclick = () => {
         showModal(
             '<h3>🏆 قواعد الجولة الكبرى: دليل المشخص المحترف</h3>',
@@ -853,9 +852,37 @@ function setupEventListeners() {
             startGrandRound
         );
     };
-
-    // أزرار شاشة اللعب
     buttons.skipQuestion.onclick = skipQuestion;
+    buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
+    buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
+    buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
+    
+    // ==================== بداية الكود التشخيصي المنبثق ====================
+    buttons.showStats.onclick = () => {
+        const title = "تشخيص خطأ: الزر لا يستجيب";
+        const explanation = `
+            <p>لقد ضغطت على زر الإحصائيات، وهذه النافذة ظهرت بدلاً من شاشة الإحصائيات لتوضيح سبب المشكلة.</p>
+            <hr>
+            <h4>السبب:</h4>
+            <p>المشكلة تكمن في طريقة استدعاء الدالة. الكود الأصلي كان هكذا:</p>
+            <code style="background: #ffebeb; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = () => displayStats;</code>
+            <p>هذا الكود يرجع "مرجعاً" للدالة، لكنه لا "ينفذها". إنه مثل إعطائك عنوان منزل بدلاً من أخذك إليه.</p>
+            
+            <h4>الحل:</h4>
+            <p>الحل هو استدعاء الدالة مباشرةً بإضافة القوسين <code>()</code> أو إسنادها مباشرة:</p>
+            <code style="background: #e6ffed; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = displayStats;</code>
+            <p>أو</p>
+            <code style="background: #e6ffed; padding: 2px 6px; border-radius: 4px; display: block; text-align: left; direction: ltr;">buttons.showStats.onclick = () => displayStats();</code>
+            <p>هذا الكود "ينفذ" الدالة، أي أنه يأخذك فعلاً إلى المنزل.</p>
+            <hr>
+            <p>لإصلاح اللعبة، استبدل هذا الكود التشخيصي بالحل الصحيح.</p>
+        `;
+        showModal(title, explanation, false); // false لإخفاء أزرار التأكيد والإلغاء
+    };
+    // ===================== نهاية الكود التشخيصي المنبثق =====================
+
+    buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
+
     document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
         if (tool.dataset.tool === 'consultation') {
             tool.onclick = () => useAssistTool(tool);
@@ -863,15 +890,7 @@ function setupEventListeners() {
             tool.onclick = () => useTool(tool);
         }
     });
-
-    // --- الجزء الخاص بالإحصائيات (تم التأكيد عليه) ---
-    // عند النقر على زر "عرض إحصائياتي"، قم بتشغيل دالة displayStats
-    buttons.showStats.onclick = displayStats;
     
-    // عند النقر على زر "العودة" من شاشة الإحصائيات، عد إلى شاشة اختيار الوضع
-    buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
-    
-    // أزرار النافذة المنبثقة
     modal.closeBtn.onclick = () => modal.element.style.display = 'none';
     window.onclick = (event) => {
         if (event.target == modal.element) {
@@ -880,9 +899,13 @@ function setupEventListeners() {
     };
 }
 
-// نقطة انطلاق التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    showScreen('start'); // ابدأ دائماً من شاشة البداية
-    setupEventListeners(); // قم بإعداد جميع أزرار التحكم
+    const initialScreen = location.hash ? location.hash.substring(1) : 'start';
+    if (screens[initialScreen]) {
+        showScreen(initialScreen, true);
+    } else {
+        showScreen('start', true);
+    }
+    setupEventListeners();
 });
-               
+        
