@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✅ تعديل 3: دالة جديدة للنوافذ المنبثقة المؤقتة
+    // ✅ دالة جديدة للنوافذ المنبثقة المؤقتة
     function showAutoCloseModal(title, text, duration = 2000) {
         showModal(title, text, false);
         setTimeout(() => {
@@ -151,8 +151,40 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    // ✅ تعديل 2: دالة محدثة لترتيب الأسئلة وتتبعها
-    
+    // ✅ دالة محدثة لترتيب أسئلة التحدي
+    function startGrandRound() {
+        if (personalStats.isFirstAttempt) {
+            personalStats.isFirstAttempt = false;
+        }
+        personalStats.totalAttempts++;
+        saveStats();
+
+        let questions;
+        let usedQuestionIds = new Set();
+
+        if (personalStats.totalAttempts === 1) {
+            questions = [...challengeBank.core.easy, ...challengeBank.core.medium, ...challengeBank.core.hard];
+        } else {
+            const easy = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
+            const medium = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
+            const hard = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
+            questions = [...easy, ...medium, ...hard];
+        }
+
+        questions.forEach(q => usedQuestionIds.add(q.id));
+
+        gameState = {
+            mode: 'grand_round',
+            questions: questions,
+            currentQuestionIndex: 0,
+            budget: 200,
+            usedQuestionIds: usedQuestionIds,
+        };
+        startTimer(15 * 60, gameElements.timerDisplay);
+        setupQuestion();
+        showScreen('game');
+    }
+
     // --- دوال منطق اللعبة ---
     function setupQuestion() {
         gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
@@ -179,49 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🔴 استبدل دالة startGrandRound القديمة بهذه 🔴
-function startGrandRound() {
-    if (personalStats.isFirstAttempt) {
-        personalStats.isFirstAttempt = false;
-    }
-    personalStats.totalAttempts++;
-    saveStats();
-
-    let questions;
-    let usedQuestionIds = new Set(); // لتتبع الأسئلة المستخدمة
-
-    if (personalStats.totalAttempts === 1) {
-        // المحاولة الأولى تستخدم الأسئلة الأساسية بالترتيب
-        questions = [
-            ...challengeBank.core.easy,
-            ...challengeBank.core.medium,
-            ...challengeBank.core.hard
-        ];
-    } else {
-        // المحاولات التالية تختار عشوائياً من البنك الاحتياطي وتحافظ على الترتيب
-        const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
-        const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
-        const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
-        
-        // دمج الأسئلة بالترتيب: سهل -> متوسط -> صعب
-        questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
-    }
-
-    // إضافة IDs الأسئلة الأولية إلى مجموعة المستخدمة
-    questions.forEach(q => usedQuestionIds.add(q.id));
-
-    gameState = {
-        mode: 'grand_round',
-        questions: questions,
-        currentQuestionIndex: 0,
-        budget: 200,
-        usedQuestionIds: usedQuestionIds, // إضافة المجموعة إلى حالة اللعبة
-    };
-    startTimer(15 * 60, gameElements.timerDisplay);
-    setupQuestion();
-    showScreen('game');
-}
-    
+    // ✅ دالة محدثة لاستخدام النوافذ المؤقتة
     function checkAnswer(selectedAnswer) {
         document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
         const question = gameState.questions[gameState.currentQuestionIndex];
@@ -301,14 +291,14 @@ function startGrandRound() {
         showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
     }
 
-    // ✅ تعديل 1: دالة مساعدة للبحث عن سؤال بديل
+    // ✅ دالة مساعدة للبحث عن سؤال بديل
     function findReplacementQuestion(difficulty) {
         const available = challengeBank.reserve[difficulty];
         const unused = available.filter(q => !gameState.usedQuestionIds.has(q.id));
         return unused.length > 0 ? unused[Math.floor(Math.random() * unused.length)] : null;
     }
 
-    // ✅ تعديل 1: دالة تخطي السؤال المحدثة بمنطق الاستبدال
+    // ✅ دالة تخطي السؤال المحدثة بمنطق الاستبدال
     function skipQuestion() {
         const penalty = 50;
         if (gameState.budget < penalty) {
