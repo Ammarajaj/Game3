@@ -62,16 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
         isFirstAttempt: true,
     };
     let timerInterval;
-    let currentScreenName = 'start';
+    // ✨ تم حذف متغير currentScreenName لأنه لم يعد ضرورياً والاعتماد على history.state مباشرة
 
     // --- وظائف التحكم بالواجهة ---
 
     // =================================================================================
-    // ✨ تم تحديث دالة showScreen لتكون أبسط وأكثر فعالية
+    // ✨ تم تحديث دالة showScreen وإعادة دمج isPoppingState للتحكم الدقيق
     // =================================================================================
-    function showScreen(screenName) {
-        currentScreenName = screenName;
-        
+    function showScreen(screenName, isPoppingState = false) {
         // إخفاء كل الشاشات أولاً
         Object.values(screens).forEach(screen => screen.classList.remove('active'));
         statsPage.classList.remove('active');
@@ -82,38 +80,36 @@ document.addEventListener('DOMContentLoaded', () => {
             targetScreen.classList.add('active');
         }
 
-        // تحديث سجل المتصفح فقط إذا كانت الحالة الجديدة مختلفة
-        if (history.state?.screen !== screenName) {
+        // فقط أضف حالة جديدة إلى السجل إذا لم يكن هذا الإجراء ناتجًا عن زر الرجوع
+        if (!isPoppingState) {
             history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
         }
     }
 
     // =================================================================================
-    // ✨ تم تحديث معالج onpopstate ليكون أكثر دقة
+    // ✨ تم تبسيط معالج onpopstate بشكل كبير ليعكس الحالة الصحيحة دائمًا
     // =================================================================================
     window.onpopstate = function(event) {
-        // إذا كان المستخدم في شاشة اللعب، اظهر نافذة تأكيد
-        if (currentScreenName === 'game') {
-            history.forward(); // منع الرجوع الفعلي
+        // إذا كان المستخدم يحاول الخروج من شاشة اللعب
+        if (history.state?.screen === 'game') {
+            history.forward(); // امنع الرجوع فوراً
             showModal(
                 'تأكيد الخروج',
                 'هل أنت متأكد من رغبتك في مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.',
                 true,
                 () => {
                     clearInterval(timerInterval);
-                    showScreen('modeSelection'); // عند التأكيد، اذهب إلى شاشة اختيار الوضع
+                    // استخدم history.back() للعودة بشكل صحيح بدلاً من showScreen مباشرة
+                    history.back(); 
                 }
             );
-            return; // إنهاء الدالة هنا
+            return;
         }
 
-        // إذا كان هناك حالة مسجلة في event.state، انتقل إليها
-        if (event.state && event.state.screen) {
-            showScreen(event.state.screen);
-        } else {
-            // كحالة افتراضية، انتقل إلى شاشة البداية
-            showScreen('start');
-        }
+        // لأي حالة أخرى، اعرض الشاشة المسجلة في event.state
+        // إذا كان event.state فارغًا (null)، فهذا يعني أننا في بداية السجل، لذا اذهب إلى 'start'
+        const targetScreen = event.state?.screen || 'start';
+        showScreen(targetScreen, true); // true لمنع إضافة حالة جديدة للسجل
     };
 
     function showModal(title, text, showConfirmButtons = false, onConfirm = null) {
@@ -405,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
         
         showStatsButton.onclick = showStatistics;
-        statsBackButton.onclick = () => showScreen('modeSelection');
+        statsBackButton.onclick = () => history.back(); // ✨ الأفضل استخدام history.back() هنا
 
         document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
             tool.onclick = tool.dataset.tool === 'consultation' ? () => useAssistTool(tool) : () => useTool(tool);
@@ -416,20 +412,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =================================================================================
-    // ✨ تم تحديث دالة بدء التشغيل لتسجيل الحالة الأولية بشكل صحيح
+    // ✨ تم تحديث دالة بدء التشغيل لتكون هي المسؤولة عن الحالة الأولية
     // =================================================================================
     function initializeApp() {
         setupEventListeners();
 
-        // تحديد الشاشة الأولية بناءً على الرابط (الهاش)
+        // استبدل الحالة الأولية الفارغة بحالة شاشة البداية الصحيحة
+        // هذا يضمن أن السجل يبدأ دائمًا بحالة معروفة
         const initialScreen = location.hash ? location.hash.substring(1) : 'start';
-        
-        // عرض الشاشة الأولية
-        showScreen(initialScreen);
-
-        // استبدال الحالة الأولية الفارغة بحالة شاشة البداية
-        // هذا يضمن أن زر الرجوع من أي شاشة أخرى سيعود إلى شاشة البداية وليس خارج الموقع
         history.replaceState({ screen: initialScreen }, `Screen ${initialScreen}`, `#${initialScreen}`);
+
+        // اعرض الشاشة الأولية بناءً على الحالة التي تم ضبطها
+        showScreen(initialScreen, true);
     }
 
     // --- بدء تشغيل التطبيق ---
