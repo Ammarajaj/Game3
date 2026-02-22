@@ -38,8 +38,7 @@
                     <p>اختبر معرفتك في 15 حالة عشوائية. أي خطأ ينهي الجولة!</p>
                 </button>
             </div>
-            <!-- ✅ الزر الجديد للإحصائيات مع ID واضح -->
-            <button id="show-stats-button" class="btn-tertiary">📊 عرض الإحصائيات</button>
+            <button id="stats-btn-main" class="btn-tertiary">📊 عرض إحصائياتي</button>
         </div>
     </div>
 
@@ -102,44 +101,44 @@
                     <div class="toolbox">
                         <!-- أدوات التشخيص المحدثة -->
                         <div class="tool-item" data-tool="taammul">
-                            <span class="tool-cost">-10</span>
+                            <span class="tool-cost">10</span>
                             <span class="tool-icon">👀</span>
                             <span class="tool-name">تأمل</span>
                         </div>
                         <div class="tool-item" data-tool="jass">
-                            <span class="tool-cost">-10</span>
+                            <span class="tool-cost">10</span>
                             <span class="tool-icon">✋</span>
                             <span class="tool-name">جس</span>
                         </div>
                         <div class="tool-item" data-tool="qar">
-                            <span class="tool-cost">-10</span>
+                            <span class="tool-cost">10</span>
                             <span class="tool-icon">🥁</span>
                             <span class="tool-name">قرع</span>
                         </div>
                         <div class="tool-item" data-tool="tasammu">
-                            <span class="tool-cost">-10</span>
+                            <span class="tool-cost">10</span>
                             <span class="tool-icon">🩺</span>
                             <span class="tool-name">تسمع</span>
                         </div>
                         <div class="tool-item" data-tool="munakkisat">
-                            <span class="tool-cost">-10</span>
+                            <span class="tool-cost">10</span>
                             <span class="tool-icon">🔨</span>
                             <span class="tool-name">منعكسات</span>
                         </div>
                         <div class="tool-item" data-tool="tahmeel">
                             <span class="tool-cost">20</span>
-                            <span class="tool-icon">-🩸</span>
+                            <span class="tool-icon">🩸</span>
                             <span class="tool-name">تحاليل</span>
                         </div>
                         <div class="tool-item" data-tool="takhṭīṭ_qalb">
-                            <span class="tool-cost">-15</span>
+                            <span class="tool-cost">15</span>
                             <span class="tool-icon">❤️</span>
                             <span class="tool-name">تخطيط قلب</span>
                         </div>
                         
                         <!-- أدوات المساعدة -->
                         <div class="tool-item assist-tool" data-tool="consultation">
-                            <span class="tool-cost">-40</span>
+                            <span class="tool-cost">40</span>
                             <span class="tool-icon">💡</span>
                             <span class="tool-name">استشارة 50/50</span>
                         </div>
@@ -147,7 +146,7 @@
                         <!-- زر تخطي السؤال -->
                         <div id="skip-question-btn" class="tool-item skip-btn">
                             <span class="tool-icon">⏭️</span>
-                            <span class="tool-name">تخطي (50-)</span>
+                            <span class="tool-name">تخطي (30-)</span>
                         </div>
                     </div>
                 </div>
@@ -183,33 +182,29 @@
         </div>
     </div>
 
-    <!-- ✅ شاشة الإحصائيات الجديدة بالكامل مع IDs واضحة -->
-    <div id="statistics-page" class="screen">
+    <!-- شاشة الإحصائيات -->
+    <div id="stats-screen" class="screen">
         <div class="container">
             <h2>📊 إحصائيات الأداء</h2>
-            
             <div class="stats-grid">
                 <div class="stat-card">
                     <h4>أفضل نسبة أداء</h4>
-                    <p id="stats-best-percentage">0%</p>
+                    <p id="best-percentage">0%</p>
                 </div>
                 <div class="stat-card">
                     <h4>إجمالي المحاولات</h4>
-                    <p id="stats-total-attempts">0</p>
+                    <p id="total-attempts-stats">0</p>
                 </div>
                 <div class="stat-card">
                     <h4>أعلى مرحلة تم الوصول إليها</h4>
-                    <p id="stats-highest-stage">0 / 15</p>
+                    <p id="highest-stage">0 / 15</p>
                 </div>
             </div>
-    
             <h3>سجل آخر 5 محاولات</h3>
-            <ul id="stats-history-list" class="history-list">
+            <ul id="recent-history-list" class="history-list">
                 <li>لا يوجد سجل محاولات بعد.</li>
             </ul>
-    
-            <!-- زر العودة بـ id جديد -->
-            <button id="stats-back-button" class="btn-secondary">العودة</button>
+            <button id="back-to-main-menu-stats" class="btn-secondary">العودة</button>
         </div>
     </div>
 
@@ -226,16 +221,8 @@
         </div>
     </div>
 
-    <!-- في نهاية ملف index.html -->
-
-    <!-- ... باقي محتوى الصفحة ... -->
-
-    <!-- ✅ الخطوة 1: استدعاء ملف بنك الأسئلة أولاً -->
     <script src="questionbank.js"></script>
-
-    <!-- ✅ الخطوة 2: استدعاء ملف المنطق الرئيسي ثانيًا -->
     <script src="script.js"></script>
 
 </body>
 </html>
-
