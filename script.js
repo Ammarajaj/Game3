@@ -560,7 +560,23 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.cancelBtn.style.display = 'none';
         }
     }
+// ✅ دالة جديدة للنوافذ المنبثقة المؤقتة
+function showAutoCloseModal(title, text, duration = 2000) {
+    modal.title.innerHTML = title;
+    modal.text.innerHTML = text;
+    
+    // إخفاء الأزرار
+    modal.confirmBtn.style.display = 'none';
+    modal.cancelBtn.style.display = 'none';
 
+    modal.element.style.display = 'flex';
+
+    // إغلاق النافذة تلقائياً بعد فترة
+    setTimeout(() => {
+        modal.element.style.display = 'none';
+    }, duration);
+}
+    
     // --- وظائف الإعداد والتحكم ---
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -616,45 +632,17 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    function startGrandRound() {
-        if (personalStats.isFirstAttempt) {
-            personalStats.isFirstAttempt = false;
-        }
-        personalStats.totalAttempts++;
-        saveStats();
-
-        let questions;
-        if (personalStats.totalAttempts === 1) {
-            questions = [
-                ...challengeBank.core.easy,
-                ...challengeBank.core.medium,
-                ...challengeBank.core.hard
-            ];
-        } else {
-            const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
-            const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
-            const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
-            questions = shuffleArray([...easyQuestions, ...mediumQuestions, ...hardQuestions]);
-        }
-
-        gameState = {
-            mode: 'grand_round',
-            questions: questions,
-            currentQuestionIndex: 0,
-            budget: 200,
-        };
-        startTimer(15 * 60, gameElements.timerDisplay);
-        setupQuestion();
-        showScreen('game');
-    }
+    
 
     function setupSpecialtySelection() {
         const grid = document.getElementById('specialty-grid');
         grid.innerHTML = '';
         Object.keys(trainingBank).forEach(specialty => {
-            const button = document.createElement('button');
-            button.className = 'specialty-btn';
-            button.textContent = specialty;
+            const button = docu    gameElements.timerDisplay.textContent = '∞';
+    }
+
+     'specialty-btn';
+            button.textContent = specialtyton.textContent = specialty;
             button.onclick = () => startTrainingMode(specialty);
             grid.appendChild(button);
         });
@@ -746,6 +734,43 @@ document.addEventListener('DOMContentLoaded', () => {
             showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
         }
     }
+function startGrandRound() {
+    if (personalStats.isFirstAttempt) {
+        personalStats.isFirstAttempt = false;
+    }
+    personalStats.totalAttempts++;
+    saveStats();
+
+    let questions;
+
+    // ✅ المنطق الجديد لترتيب الأسئلة حسب الصعوبة
+    if (personalStats.totalAttempts === 1) {
+        // المحاولة الأولى تستخدم الأسئلة الأساسية بالترتيب
+        questions = [
+            ...challengeBank.core.easy,
+            ...challengeBank.core.medium,
+            ...challengeBank.core.hard
+        ];
+    } else {
+        // المحاولات التالية تختار عشوائياً من البنك الاحتياطي وتحافظ على الترتيب
+        const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
+        const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
+        const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
+        
+        // دمج الأسئلة بالترتيب: سهل -> متوسط -> صعب
+        questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+    }
+
+    gameState = {
+        mode: 'grand_round',
+        questions: questions,
+        currentQuestionIndex: 0,
+        budget: 200,
+    };
+    startTimer(15 * 60, gameElements.timerDisplay);
+    setupQuestion();
+    showScreen('game');
+}
 
     function skipQuestion() {
         const penalty = 30;
@@ -781,23 +806,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkAnswer(selectedAnswer) {
-        const question = gameState.questions[gameState.currentQuestionIndex];
-        if (selectedAnswer === question.answer) {
-            const reward = 15;
-            updateBudget(reward);
-            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
-            setTimeout(nextQuestion, 1500);
+    const question = gameState.questions[gameState.currentQuestionIndex];
+    
+    // تعطيل جميع أزرار الخيارات لمنع النقرات المتعددة
+    document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
+
+    if (selectedAnswer === question.answer) {
+        const reward = 15;
+        updateBudget(reward);
+        // ✅ استخدام النافذة المؤقتة
+        showAutoCloseModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
+        setTimeout(nextQuestion, 2000); // تأخير الانتقال للسؤال التالي
+    } else {
+        if (gameState.mode === 'grand_round') {
+            // في وضع التحدي، الخسارة فورية
+            showAutoCloseModal('إجابة خاطئة!', `للأسف، التشخيص الصحيح كان: <b>${question.answer}</b>. انتهت الجولة.`);
+            setTimeout(loseGame, 2500); // تأخير الانتقال لشاشة الخسارة
         } else {
-            if (gameState.mode === 'grand_round') {
-                loseGame();
-            } else {
-                const penalty = 25;
-                updateBudget(-penalty);
-                showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`);
-                setTimeout(nextQuestion, 3000);
-            }
+            // في وضع التدريب، يتم خصم النقاط والمتابعة
+            const penalty = 25;
+            updateBudget(-penalty);
+            // ✅ استخدام النافذة المؤقتة مع مدة أطول لقراءة الإجابة
+            showAutoCloseModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`, 3000);
+            setTimeout(nextQuestion, 3000); // تأخير الانتقال للسؤال التالي
         }
     }
+    }
+    
 
     function nextQuestion() {
         gameState.currentQuestionIndex++;
