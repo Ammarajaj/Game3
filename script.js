@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         game: document.getElementById('game-screen'),
         lose: document.getElementById('lose-screen'),
         win: document.getElementById('win-screen'),
-        hacking: document.getElementById('hacking-screen'), // ✨ إضافة شاشة التهكير
+        hacking: document.getElementById('hacking-screen'),
     };
     const buttons = {
         startGame: document.getElementById('start-game-btn'),
@@ -169,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    // ✨ تم تعديل الدالة لتقبل الميزانية
     function startGrandRound(initialBudget = 200) {
         if (personalStats.isFirstAttempt) {
             personalStats.isFirstAttempt = false;
@@ -192,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mode: 'grand_round',
             questions: questions,
             currentQuestionIndex: 0,
-            budget: initialBudget, // ✨ استخدام الميزانية الممررة
+            budget: initialBudget,
         };
         startTimer(15 * 60, gameElements.timerDisplay);
         setupQuestion();
@@ -383,11 +382,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✨ --- دالة تشغيل شاشة التهكير --- ✨
     function runHackingSequence() {
         showScreen('hacking');
         const terminal = document.getElementById('terminal');
-        terminal.innerHTML = ''; // تنظيف الشاشة
+        terminal.innerHTML = '';
 
         const lines = [
             '> Establishing connection to central server... [OK]',
@@ -399,6 +397,8 @@ document.addEventListener('DOMContentLoaded', () => {
             '> جاري تفعيل ميزة قناص البصمجة... 🔥'
         ];
 
+        const giftAlreadyReceived = localStorage.getItem('jokeGiftReceived') === 'true';
+
         let lineIndex = 0;
         const interval = setInterval(() => {
             if (lineIndex < lines.length) {
@@ -408,7 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 lineIndex++;
             } else {
                 clearInterval(interval);
-                // عرض الرسائل النهائية بعد انتهاء التسلسل
                 setTimeout(() => {
                     const finalMsg = document.createElement('p');
                     finalMsg.className = 'final-message';
@@ -418,37 +417,40 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         const bonusMsg = document.createElement('p');
                         bonusMsg.className = 'bonus-message';
-                        bonusMsg.textContent = 'وبمناسبة انضمامك، هذه 100 نقطة هدية لتبدأ بها. بالتوفيق!';
+
+                        if (giftAlreadyReceived) {
+                            bonusMsg.textContent = 'لقد استلمت هدية الانضمام مسبقًا. شكرًا لولائك للمجتمع!';
+                        } else {
+                            bonusMsg.textContent = 'وبمناسبة انضمامك، هذه 100 نقطة هدية لتبدأ بها. بالتوفيق!';
+                            localStorage.setItem('jokeGiftReceived', 'true');
+                        }
+                        
                         terminal.appendChild(bonusMsg);
 
-                        // العودة إلى الشاشة الرئيسية بعد عرض كل شيء
                         setTimeout(() => {
                             showScreen('modeSelection');
-                        }, 5000); // انتظر 5 ثوانٍ قبل العودة
+                        }, 5000);
 
                     }, 2000);
 
                 }, 1000);
             }
-        }, 600); // سرعة ظهور الأسطر
+        }, 600);
     }
 
-
-    // --- نقطة الانطلاق وربط الأحداث ---
     function setupEventListeners() {
         buttons.startGame.onclick = () => showScreen('modeSelection');
         buttons.trainingMode.onclick = setupSpecialtySelection;
         
-        // ✨ تعديل زر الجولة الكبرى لتطبيق الهدية
         buttons.grandRound.onclick = () => {
             const rulesText = `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`;
             showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', rulesText, true, () => {
-                const bonusClaimed = localStorage.getItem('jokeBonusClaimed') === 'true';
+                const bonusAvailable = localStorage.getItem('jokeGiftReceived') === 'true' && localStorage.getItem('jokeBonusUsed') !== 'true';
                 let initialBudget = 200;
                 
-                if (bonusClaimed) {
+                if (bonusAvailable) {
                     initialBudget += 100;
-                    localStorage.removeItem('jokeBonusClaimed'); // استخدم الهدية مرة واحدة فقط
+                    localStorage.setItem('jokeBonusUsed', 'true');
                     setTimeout(() => {
                         showModal('🎁 تم إضافة الهدية!', 'تمت إضافة 100 نقطة إلى ميزانيتك الأولية. حظًا موفقًا!');
                     }, 500);
@@ -472,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.closeBtn.onclick = () => modal.element.style.display = 'none';
         window.onclick = (event) => { if (event.target == modal.element) modal.element.style.display = 'none'; };
 
-        // ✨ --- منطق المزحة الكامل --- ✨
         const jokeContainer = document.getElementById('joke-container');
         let jokeStage = 0;
 
@@ -497,14 +498,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     modalTitle = '🎁';
                     modalText = 'هههههههههههههههههههههه صدقت؟ تنينا فارشين أصلاً... اضغط آخر مرة بوعدك';
                     nextStageAction = () => {
-                        localStorage.setItem('jokeBonusClaimed', 'true');
-                        runHackingSequence(); // ✨ تشغيل شاشة التهكير
+                        runHackingSequence();
                     };
                     break;
             }
 
             jokeContainer.innerHTML = '';
-            if (jokeStage > 2) return; // توقف عن إنشاء الزر بعد المرحلة الأخيرة
+            if (jokeStage > 2) return;
 
             const jokeBtn = document.createElement('button');
             jokeBtn.id = 'joke-btn';
@@ -519,7 +519,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (nextStageAction) nextStageAction();
                     }, 3000);
                 } else {
-                    // للمرحلة الأخيرة، لا تظهر نافذة منبثقة، بل انتقل مباشرة
                     if (nextStageAction) nextStageAction();
                 }
             };
@@ -527,7 +526,17 @@ document.addEventListener('DOMContentLoaded', () => {
             jokeContainer.appendChild(jokeBtn);
         };
 
-        setupJokeButton(); // بدء سلسلة المزاح
+        const jokeCompleted = localStorage.getItem('jokeGiftReceived') === 'true';
+        if (jokeCompleted) {
+            const completedBtn = document.createElement('button');
+            completedBtn.className = 'btn-secondary';
+            completedBtn.textContent = 'مجتمع قناصي البصمجة';
+            completedBtn.onclick = runHackingSequence;
+            jokeContainer.innerHTML = '';
+            jokeContainer.appendChild(completedBtn);
+        } else {
+            setupJokeButton();
+        }
     }
 
     function initializeApp() {
