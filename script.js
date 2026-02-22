@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelBtn: document.getElementById('modal-cancel-btn'),
     };
 
-    // 2. تعريف عناصر شاشة الإحصائيات الجديدة
+    // ✅ 2. تعريف عناصر شاشة الإحصائيات الجديدة
     const statsPage = document.getElementById('statistics-page');
     const showStatsButton = document.getElementById('show-stats-button');
     const statsBackButton = document.getElementById('stats-back-button');
@@ -67,8 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- وظائف التحكم بالواجهة ---
     function showScreen(screenName, isPoppingState = false) {
+        // إخفاء كل الشاشات أولاً
         Object.values(screens).forEach(screen => screen.classList.remove('active'));
-        statsPage.classList.remove('active');
+        statsPage.classList.remove('active'); // التأكد من إخفاء شاشة الإحصائيات أيضاً
 
         if (screens[screenName]) {
             screens[screenName].classList.add('active');
@@ -121,18 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✅ دالة جديدة للنوافذ المنبثقة المؤقتة
-    function showAutoCloseModal(title, text, duration = 2000) {
-        modal.title.innerHTML = title;
-        modal.text.innerHTML = text;
-        modal.confirmBtn.style.display = 'none';
-        modal.cancelBtn.style.display = 'none';
-        modal.element.style.display = 'flex';
-        setTimeout(() => {
-            modal.element.style.display = 'none';
-        }, duration);
-    }
-
     // --- وظائف الإعداد والتحكم ---
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -146,23 +135,32 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('personalStats', JSON.stringify(personalStats));
     }
 
+    // ✅ دالة جديدة ومحسنة لعرض الإحصائيات
     function showStatistics() {
+        // 1. إخفاء كل الشاشات الأخرى
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        
+        // 2. تحديث البيانات من المتغير العام personalStats
         statsBestPercentage.textContent = `${personalStats.bestPercentage}%`;
         statsTotalAttempts.textContent = personalStats.totalAttempts;
         statsHighestStage.textContent = personalStats.highestStage;
-        statsHistoryList.innerHTML = '';
+
+        // 3. تحديث سجل المحاولات
+        statsHistoryList.innerHTML = ''; // تفريغ القائمة أولاً
         if (personalStats.recentHistory.length === 0) {
             statsHistoryList.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
         } else {
+            // عرض المحاولات من الأحدث إلى الأقدم
             [...personalStats.recentHistory].reverse().forEach(attempt => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>النتيجة: <b>${attempt.percentage}%</b></span> <span>المرحلة: ${attempt.stage}</span>`;
                 statsHistoryList.appendChild(li);
             });
         }
+
+        // 4. إظهار شاشة الإحصائيات
         statsPage.classList.add('active');
-        currentScreenName = 'statistics';
+        currentScreenName = 'statistics'; // تحديث اسم الشاشة الحالية
     }
 
     function startTrainingMode(specialty) {
@@ -179,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    // ✅ دالة محدثة لترتيب الأسئلة وتتبعها
     function startGrandRound() {
         if (personalStats.isFirstAttempt) {
             personalStats.isFirstAttempt = false;
@@ -188,8 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
         saveStats();
 
         let questions;
-        let usedQuestionIds = new Set();
-
         if (personalStats.totalAttempts === 1) {
             questions = [
                 ...challengeBank.core.easy,
@@ -200,17 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
             const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
             const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
-            questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+            questions = shuffleArray([...easyQuestions, ...mediumQuestions, ...hardQuestions]);
         }
-
-        questions.forEach(q => usedQuestionIds.add(q.id));
 
         gameState = {
             mode: 'grand_round',
             questions: questions,
             currentQuestionIndex: 0,
             budget: 200,
-            usedQuestionIds: usedQuestionIds,
         };
         startTimer(15 * 60, gameElements.timerDisplay);
         setupQuestion();
@@ -316,45 +308,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✅ دالة مساعدة للبحث عن سؤال بديل
-    function findReplacementQuestion(difficulty) {
-        const availableQuestions = challengeBank.reserve[difficulty];
-        const unusedQuestions = availableQuestions.filter(q => !gameState.usedQuestionIds.has(q.id));
-        if (unusedQuestions.length > 0) {
-            const randomIndex = Math.floor(Math.random() * unusedQuestions.length);
-            return unusedQuestions[randomIndex];
-        }
-        return null;
-    }
-
-    // ✅ دالة تخطي السؤال المحدثة بمنطق الاستبدال
     function skipQuestion() {
-        const penalty = 50;
+        const penalty = 30;
         if (gameState.budget < penalty) {
             showModal('لا يمكن التخطي!', `أنت بحاجة إلى ${penalty} نقطة على الأقل لتخطي السؤال.`);
             return;
         }
-        if (gameState.mode !== 'grand_round') {
-            showModal('ميزة غير متاحة!', 'استبدال الأسئلة متاح فقط في وضع الجولة الكبرى.');
-            return;
-        }
         showModal(
             'تأكيد التخطي',
-            `هل أنت متأكد؟ سيتم خصم <b>${penalty} نقطة</b> واستبدال هذا السؤال بسؤال آخر من نفس الصعوبة.`,
+            `هل أنت متأكد من رغبتك في تخطي هذا السؤال؟ سيتم خصم <b>${penalty} نقطة</b> من ميزانيتك.`,
             true,
             () => {
-                const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
-                const difficulty = currentQuestion.level;
-                const replacementQuestion = findReplacementQuestion(difficulty);
-                if (!replacementQuestion) {
-                    showModal('لا يمكن التخطي!', 'عذراً، لا توجد أسئلة بديلة متاحة من هذا المستوى حالياً.');
-                    return;
-                }
                 updateBudget(-penalty);
-                gameState.questions[gameState.currentQuestionIndex] = replacementQuestion;
-                gameState.usedQuestionIds.add(replacementQuestion.id);
-                setupQuestion();
-                showAutoCloseModal('تم الاستبدال!', 'تم استبدال السؤال بنجاح.', 1500);
+                showModal('تم التخطي!', 'لقد تخطيت السؤال الحالي.');
+                setTimeout(nextQuestion, 1500);
             }
         );
     }
@@ -374,24 +341,20 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.budgetDisplay.textContent = gameState.budget;
     }
 
-    // ✅ دالة محدثة لاستخدام النوافذ المؤقتة
     function checkAnswer(selectedAnswer) {
         const question = gameState.questions[gameState.currentQuestionIndex];
-        document.querySelectorAll('.choice-btn').forEach(btn => btn.disabled = true);
-
         if (selectedAnswer === question.answer) {
             const reward = 15;
             updateBudget(reward);
-            showAutoCloseModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
-            setTimeout(nextQuestion, 2000);
+            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
+            setTimeout(nextQuestion, 1500);
         } else {
             if (gameState.mode === 'grand_round') {
-                showAutoCloseModal('إجابة خاطئة!', `للأسف، التشخيص الصحيح كان: <b>${question.answer}</b>. انتهت الجولة.`, 2500);
-                setTimeout(loseGame, 2500);
+                loseGame();
             } else {
                 const penalty = 25;
                 updateBudget(-penalty);
-                showAutoCloseModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`, 3000);
+                showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`);
                 setTimeout(nextQuestion, 3000);
             }
         }
@@ -461,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<h3>🏆 قواعد الجولة الكبرى</h3>',
                 `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p>
                 <ul>
-                    <li><b>الهدف:</b> حل 15 حالة سريرية مرتبة حسب الصعوبة.</li>
+                    <li><b>الهدف:</b> حل 15 حالة سريرية عشوائية.</li>
                     <li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li>
                     <li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li>
                     <li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
@@ -475,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
         
+        // ✅ ربط الأحداث للأزرار الجديدة الخاصة بالإحصائيات
         showStatsButton.onclick = showStatistics;
         statsBackButton.onclick = () => showScreen('modeSelection');
 
