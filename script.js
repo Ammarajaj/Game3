@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    function startGrandRound(initialBudget = 200) {
+    function startGrandRound() {
         if (personalStats.isFirstAttempt) {
             personalStats.isFirstAttempt = false;
         }
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mode: 'grand_round',
             questions: questions,
             currentQuestionIndex: 0,
-            budget: initialBudget,
+            budget: 200, // ميزانية ثابتة
         };
         startTimer(15 * 60, gameElements.timerDisplay);
         setupQuestion();
@@ -397,8 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
             '> جاري تفعيل ميزة قناص البصمجة... 🔥'
         ];
 
-        const giftAlreadyReceived = localStorage.getItem('jokeGiftReceived') === 'true';
-
         let lineIndex = 0;
         const interval = setInterval(() => {
             if (lineIndex < lines.length) {
@@ -417,14 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         const bonusMsg = document.createElement('p');
                         bonusMsg.className = 'bonus-message';
-
-                        if (giftAlreadyReceived) {
-                            bonusMsg.textContent = 'لقد استلمت هدية الانضمام مسبقًا. شكرًا لولائك للمجتمع!';
-                        } else {
-                            bonusMsg.textContent = 'وبمناسبة انضمامك، هذه 100 نقطة هدية لتبدأ بها. بالتوفيق!';
-                            localStorage.setItem('jokeGiftReceived', 'true');
-                        }
-                        
+                        bonusMsg.textContent = 'كمكافأة، لديك 200 نقطة ميزانية لتبدأ بها التحدي. انطلق!';
                         terminal.appendChild(bonusMsg);
 
                         setTimeout(() => {
@@ -444,20 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         buttons.grandRound.onclick = () => {
             const rulesText = `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`;
-            showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', rulesText, true, () => {
-                const bonusAvailable = localStorage.getItem('jokeGiftReceived') === 'true' && localStorage.getItem('jokeBonusUsed') !== 'true';
-                let initialBudget = 200;
-                
-                if (bonusAvailable) {
-                    initialBudget += 100;
-                    localStorage.setItem('jokeBonusUsed', 'true');
-                    setTimeout(() => {
-                        showModal('🎁 تم إضافة الهدية!', 'تمت إضافة 100 نقطة إلى ميزانيتك الأولية. حظًا موفقًا!');
-                    }, 500);
-                }
-                
-                startGrandRound(initialBudget);
-            });
+            showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', rulesText, true, startGrandRound);
         };
 
         buttons.skipQuestion.onclick = skipQuestion;
@@ -497,9 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     btnText = 'امزح معك أصلاً! اضغط هنا مجهزلك مفاجأة';
                     modalTitle = '🎁';
                     modalText = 'هههههههههههههههههههههه صدقت؟ تنينا فارشين أصلاً... اضغط آخر مرة بوعدك';
-                    nextStageAction = () => {
-                        runHackingSequence();
-                    };
+                    nextStageAction = runHackingSequence;
                     break;
             }
 
@@ -526,17 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
             jokeContainer.appendChild(jokeBtn);
         };
 
-        const jokeCompleted = localStorage.getItem('jokeGiftReceived') === 'true';
-        if (jokeCompleted) {
-            const completedBtn = document.createElement('button');
-            completedBtn.className = 'btn-secondary';
-            completedBtn.textContent = 'مجتمع قناصي البصمجة';
-            completedBtn.onclick = runHackingSequence;
-            jokeContainer.innerHTML = '';
-            jokeContainer.appendChild(completedBtn);
-        } else {
-            setupJokeButton();
-        }
+        setupJokeButton();
     }
 
     function initializeApp() {
