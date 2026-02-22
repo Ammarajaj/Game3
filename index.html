@@ -50,9 +50,14 @@
 
     <!-- شاشة اللعب الرئيسية -->
     <div id="game-screen" class="screen">
-        <div class="game-container"> <!-- حاوية جديدة للتحكم بالتخطيط -->
-            
-            <!-- 1. المحتوى الرئيسي (الهيدر + السؤال) -->
+        <div class="game-layout">
+            <div id="patient-file-area" class="patient-file-area">
+                <h3>ملف المريض</h3>
+                <div id="file-content" class="file-content">
+                    <p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>
+                </div>
+            </div>
+
             <div class="main-content">
                 <div class="game-header">
                     <div class="header-stat">
@@ -73,9 +78,13 @@
                     <h3 id="case-title">الحالة رقم #1</h3>
                     <p id="case-description">مريض أتى بشكوى...</p>
                 </div>
+
+                <div class="choices-container" id="choices-container">
+                    <!-- هذه المنطقة ستكون فارغة في البداية -->
+                    <p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>
+                </div>
             </div>
 
-            <!-- 2. صندوق الأدوات -->
             <div class="toolbox-area">
                 <h3>صندوق الأدوات</h3>
                 <div class="toolbox">
@@ -126,7 +135,7 @@
                         <span class="tool-name">تخطيط قلب</span>
                     </div>
                     
-                    <!-- أدوات المساعدة -->
+                    <!-- أدوات المساعدة والتشخيص -->
                     <div class="tool-item assist-tool" data-tool="brainstorm">
                         <span class="tool-cost">25</span>
                         <span class="tool-icon">🧠</span>
@@ -137,27 +146,14 @@
                         <span class="tool-icon">💡</span>
                         <span class="tool-name">استشارة 50/50</span>
                     </div>
+
+                    <!-- زر التشخيص النهائي -->
+                    <div id="diagnose-btn" class="tool-item diagnose-btn">
+                        <span class="tool-icon">ախ</span>
+                        <span class="tool-name">وضع التشخيص</span>
+                    </div>
                 </div>
             </div>
-
-            <!-- 3. ملف المريض -->
-            <div class="patient-file-area">
-                <h3>ملف المريض</h3>
-                <div id="file-content" class="file-content">
-                    <p class="placeholder">نتائج الفحوصات ستظهر هنا...</p>
-                </div>
-                <!-- زر التشخيص تم نقله إلى هنا -->
-                <button id="diagnose-btn" class="diagnose-btn-main">
-                    <span class="icon">ախ</span> وضع التشخيص النهائي
-                </button>
-            </div>
-
-            <!-- 4. حاوية الخيارات (منفصلة للتحكم) -->
-            <div class="choices-container" id="choices-container">
-                <!-- هذه المنطقة ستكون فارغة في البداية -->
-                <p class="choices-placeholder">اجمع المعلومات ثم اضغط على زر "وضع التشخيص" لإظهار الخيارات.</p>
-            </div>
-
         </div>
     </div>
 
