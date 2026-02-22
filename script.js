@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelBtn: document.getElementById('modal-cancel-btn'),
     };
 
-    // ✅ 2. تعريف عناصر شاشة الإحصائيات الجديدة
     const statsPage = document.getElementById('statistics-page');
     const showStatsButton = document.getElementById('show-stats-button');
     const statsBackButton = document.getElementById('stats-back-button');
@@ -63,41 +62,56 @@ document.addEventListener('DOMContentLoaded', () => {
         isFirstAttempt: true,
     };
     let timerInterval;
-    let currentScreenName = 'start';
+    let currentScreenName = 'start'; // متغير لتتبع الشاشة الحالية
 
     // --- وظائف التحكم بالواجهة ---
+
+    // =================================================================================
+    // ✨ تم تحديث دالة showScreen لإدارة سجل المتصفح (History API)
+    // =================================================================================
     function showScreen(screenName, isPoppingState = false) {
         // إخفاء كل الشاشات أولاً
         Object.values(screens).forEach(screen => screen.classList.remove('active'));
         statsPage.classList.remove('active'); // التأكد من إخفاء شاشة الإحصائيات أيضاً
 
+        // إظهار الشاشة المطلوبة
         if (screens[screenName]) {
             screens[screenName].classList.add('active');
+        } else if (screenName === 'statistics') { // حالة خاصة لشاشة الإحصائيات
+            statsPage.classList.add('active');
         }
-        currentScreenName = screenName;
+        
+        currentScreenName = screenName; // تحديث اسم الشاشة الحالية
 
-        if (!isPoppingState) {
-            if (history.state?.screen !== screenName) {
-                history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
-            }
+        // فقط قم بإضافة حالة جديدة إلى السجل إذا لم يكن هذا الإجراء ناتجًا عن الضغط على زر الرجوع
+        // وأيضًا تحقق من أن الحالة الجديدة مختلفة عن الحالة الحالية لتجنب الإدخالات المكررة
+        if (!isPoppingState && history.state?.screen !== screenName) {
+            history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
         }
     }
 
+    // =================================================================================
+    // ✨ تمت إضافة/تحديث معالج onpopstate للتحكم في زر الرجوع
+    // =================================================================================
     window.onpopstate = function(event) {
+        // إذا كان المستخدم في شاشة اللعب، اظهر نافذة تأكيد بدلاً من الرجوع
         if (currentScreenName === 'game') {
-            history.forward();
+            history.forward(); // هذه الخدعة تمنع الرجوع الفعلي وتُبقي المستخدم في نفس الصفحة
             showModal(
                 'تأكيد الخروج',
                 'هل أنت متأكد من رغبتك في مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.',
-                true,
+                true, // إظهار أزرار التأكيد والرفض
                 () => {
+                    // عند التأكيد: أوقف المؤقت وعد إلى شاشة اختيار الوضع
                     clearInterval(timerInterval);
-                    showScreen('modeSelection');
+                    showScreen('modeSelection'); 
                 }
             );
         } else if (event.state && event.state.screen) {
-            showScreen(event.state.screen, true);
+            // إذا كان هناك حالة مسجلة (أي أن المستخدم يتنقل داخل التطبيق)
+            showScreen(event.state.screen, true); // اعرض الشاشة السابقة
         } else {
+            // إذا لم يكن هناك حالة (وصل المستخدم إلى بداية السجل)، اذهب إلى الشاشة الأولى
             showScreen('start', true);
         }
     };
@@ -122,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- وظائف الإعداد والتحكم ---
+    // --- باقي دوال اللعبة (بدون تغيير) ---
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -135,32 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('personalStats', JSON.stringify(personalStats));
     }
 
-    // ✅ دالة جديدة ومحسنة لعرض الإحصائيات
     function showStatistics() {
-        // 1. إخفاء كل الشاشات الأخرى
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        
-        // 2. تحديث البيانات من المتغير العام personalStats
+        showScreen('statistics'); // استخدام دالة showScreen لإدارة السجل
         statsBestPercentage.textContent = `${personalStats.bestPercentage}%`;
         statsTotalAttempts.textContent = personalStats.totalAttempts;
         statsHighestStage.textContent = personalStats.highestStage;
-
-        // 3. تحديث سجل المحاولات
-        statsHistoryList.innerHTML = ''; // تفريغ القائمة أولاً
+        statsHistoryList.innerHTML = '';
         if (personalStats.recentHistory.length === 0) {
             statsHistoryList.innerHTML = '<li>لا يوجد سجل محاولات بعد.</li>';
         } else {
-            // عرض المحاولات من الأحدث إلى الأقدم
             [...personalStats.recentHistory].reverse().forEach(attempt => {
                 const li = document.createElement('li');
                 li.innerHTML = `<span>النتيجة: <b>${attempt.percentage}%</b></span> <span>المرحلة: ${attempt.stage}</span>`;
                 statsHistoryList.appendChild(li);
             });
         }
-
-        // 4. إظهار شاشة الإحصائيات
-        statsPage.classList.add('active');
-        currentScreenName = 'statistics'; // تحديث اسم الشاشة الحالية
     }
 
     function startTrainingMode(specialty) {
@@ -177,9 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
         gameElements.timerDisplay.textContent = '∞';
     }
 
-    // =================================================================================
-    // ✨ التعديل الثاني: تم تحديث هذه الدالة لترتيب الأسئلة حسب الصعوبة
-    // =================================================================================
     function startGrandRound() {
         if (personalStats.isFirstAttempt) {
             personalStats.isFirstAttempt = false;
@@ -187,27 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
         personalStats.totalAttempts++;
         saveStats();
 
-        let questions;
-        let sourceBank; // البنك الذي سنسحب منه الأسئلة
-
-        // المحاولة الأولى تستخدم بنك الأسئلة الأساسي، والمحاولات التالية تستخدم البنك الاحتياطي
-        if (personalStats.totalAttempts === 1) {
-            sourceBank = challengeBank.core;
-        } else {
-            sourceBank = challengeBank.reserve;
-        }
-
-        // سحب 5 أسئلة من كل مستوى صعوبة بشكل عشوائي
+        let sourceBank = (personalStats.totalAttempts === 1) ? challengeBank.core : challengeBank.reserve;
         const easyQuestions = shuffleArray([...sourceBank.easy]).slice(0, 5);
         const mediumQuestions = shuffleArray([...sourceBank.medium]).slice(0, 5);
         const hardQuestions = shuffleArray([...sourceBank.hard]).slice(0, 5);
-
-        // دمج الأسئلة بالترتيب المطلوب (سهل -> متوسط -> صعب)
-        questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
+        let questions = [...easyQuestions, ...mediumQuestions, ...hardQuestions];
         
-        // التأكد من وجود 15 سؤالاً، وإلا إظهار خطأ
         if (questions.length < 15) {
-            showModal("خطأ في بنك الأسئلة", "لا يوجد عدد كافٍ من الأسئلة لبدء الجولة الكبرى. يرجى مراجعة بنك الأسئلة.");
+            showModal("خطأ في بنك الأسئلة", "لا يوجد عدد كافٍ من الأسئلة لبدء الجولة الكبرى.");
             return;
         }
 
@@ -251,9 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // --- وظائف منطق اللعبة الفعلي ---
     function setupQuestion() {
-        // التأكد من عدم وجود أسئلة متبقية
         if (gameState.currentQuestionIndex >= gameState.questions.length) {
             if (gameState.mode === 'grand_round') winGame();
             else {
@@ -264,21 +249,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
-        document.querySelectorAll('.tool-item').forEach(t => {
-            t.classList.remove('used');
-            t.style.display = '';
-        });
+        document.querySelectorAll('.tool-item').forEach(t => { t.classList.remove('used'); t.style.display = ''; });
         
         const question = gameState.questions[gameState.currentQuestionIndex];
-        
         gameElements.budgetDisplay.textContent = gameState.budget;
         gameElements.questionCounter.textContent = `${gameState.currentQuestionIndex + 1} / ${gameState.questions.length}`;
         gameElements.caseTitle.textContent = `الحالة رقم #${gameState.currentQuestionIndex + 1} (صعوبة: ${question.level})`;
         gameElements.caseDescription.textContent = question.case;
 
         gameElements.choicesContainer.innerHTML = '';
-        const shuffledChoices = shuffleArray([...question.choices]);
-        shuffledChoices.forEach(choice => {
+        shuffleArray([...question.choices]).forEach(choice => {
             const button = document.createElement('button');
             button.className = 'choice-btn';
             button.textContent = choice;
@@ -290,9 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function useTool(toolElement) {
         if (toolElement.classList.contains('used')) return;
         const toolName = toolElement.dataset.tool;
-        const costElement = toolElement.querySelector('.tool-cost');
-        if (!costElement) return;
-        const cost = parseInt(costElement.textContent);
+        const cost = parseInt(toolElement.querySelector('.tool-cost').textContent);
         if (gameState.budget < cost) {
             showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
             return;
@@ -301,11 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toolElement.classList.add('used');
         const question = gameState.questions[gameState.currentQuestionIndex];
         const info = question.tools[toolName];
-        if (info) {
-            addInfoToPatientFile(info, toolElement.querySelector('.tool-name').textContent);
-        } else {
-            addInfoToPatientFile('لا توجد معلومات مفيدة من هذه الأداة لهذه الحالة.', toolElement.querySelector('.tool-name').textContent);
-        }
+        addInfoToPatientFile(info || 'لا توجد معلومات مفيدة من هذه الأداة لهذه الحالة.', toolElement.querySelector('.tool-name').textContent);
     }
 
     function useAssistTool(toolElement) {
@@ -320,70 +294,42 @@ document.addEventListener('DOMContentLoaded', () => {
         toolElement.classList.add('used');
         const question = gameState.questions[gameState.currentQuestionIndex];
         if (toolName === 'consultation') {
-            let wrongChoices = question.choices.filter(c => c !== question.answer);
-            wrongChoices = shuffleArray(wrongChoices).slice(0, 2);
+            let wrongChoices = shuffleArray(question.choices.filter(c => c !== question.answer)).slice(0, 2);
             document.querySelectorAll('.choice-btn').forEach(btn => {
-                if (wrongChoices.includes(btn.textContent)) {
-                    btn.style.display = 'none';
-                }
+                if (wrongChoices.includes(btn.textContent)) btn.style.display = 'none';
             });
             showModal('💡 مساعدة (50/50)', `لقد قمت باستشارة زميل، وقام باستبعاد إجابتين خاطئتين من أجلك.`);
         }
     }
 
-    // =================================================================================
-    // ✨ التعديل الأول: تم تحديث دالة التخطي بالكامل
-    // =================================================================================
     function skipQuestion() {
-        const penalty = 50; // تغيير التكلفة إلى 50
+        const penalty = 50;
         if (gameState.budget < penalty) {
             showModal('لا يمكن التخطي!', `أنت بحاجة إلى ${penalty} نقطة على الأقل لتخطي السؤال.`);
             return;
         }
-
-        // لا يمكن تخطي الأسئلة في وضع التدريب
         if (gameState.mode === 'training') {
             showModal('لا يمكن التخطي!', 'لا يمكن تخطي الأسئلة في وضع التدريب.');
             return;
         }
-
-        showModal(
-            'تأكيد التخطي',
-            `هل أنت متأكد من رغبتك في تخطي هذا السؤال؟ سيتم خصم <b>${penalty} نقطة</b> واستبدال السؤال بسؤال آخر من نفس الصعوبة.`,
-            true,
-            () => {
-                updateBudget(-penalty);
-
-                const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
-                const difficulty = currentQuestion.level; // 'easy', 'medium', 'hard'
-
-                // ابحث عن سؤال جديد من نفس الصعوبة في البنك الاحتياطي
-                const replacementPool = challengeBank.reserve[difficulty].filter(q => 
-                    !gameState.questions.some(playedQ => playedQ.case === q.case)
-                );
-
-                if (replacementPool.length > 0) {
-                    // اختر سؤالاً جديداً عشوائياً
-                    const newQuestion = shuffleArray(replacementPool)[0];
-                    // استبدل السؤال الحالي بالسؤال الجديد
-                    gameState.questions[gameState.currentQuestionIndex] = newQuestion;
-                    
-                    showModal('تم استبدال السؤال!', 'لقد تم استبدال السؤال الحالي بسؤال جديد.');
-                    setTimeout(setupQuestion, 1500); // أعد إعداد الواجهة للسؤال الجديد
-                } else {
-                    // في حالة عدم وجود أسئلة بديلة، انتقل للسؤال التالي كخيار احتياطي
-                    showModal('لا توجد أسئلة بديلة!', 'لا توجد أسئلة أخرى من نفس الصعوبة. سيتم الانتقال للسؤال التالي.');
-                    setTimeout(nextQuestion, 1500);
-                }
+        showModal('تأكيد التخطي', `هل أنت متأكد؟ سيتم خصم <b>${penalty} نقطة</b> واستبدال السؤال.`, true, () => {
+            updateBudget(-penalty);
+            const currentQuestion = gameState.questions[gameState.currentQuestionIndex];
+            const difficulty = currentQuestion.level;
+            const replacementPool = challengeBank.reserve[difficulty].filter(q => !gameState.questions.some(playedQ => playedQ.case === q.case));
+            if (replacementPool.length > 0) {
+                gameState.questions[gameState.currentQuestionIndex] = shuffleArray(replacementPool)[0];
+                showModal('تم استبدال السؤال!', 'تم استبدال السؤال الحالي بسؤال جديد.');
+                setTimeout(setupQuestion, 1500);
+            } else {
+                showModal('لا توجد أسئلة بديلة!', 'سيتم الانتقال للسؤال التالي.');
+                setTimeout(nextQuestion, 1500);
             }
-        );
+        });
     }
 
-
     function addInfoToPatientFile(info, toolName) {
-        if (gameElements.patientFileContent.querySelector('.placeholder')) {
-            gameElements.patientFileContent.innerHTML = '';
-        }
+        if (gameElements.patientFileContent.querySelector('.placeholder')) gameElements.patientFileContent.innerHTML = '';
         const infoCard = document.createElement('div');
         infoCard.className = 'info-card';
         infoCard.innerHTML = `<strong>${toolName}:</strong> ${info}`;
@@ -398,17 +344,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAnswer(selectedAnswer) {
         const question = gameState.questions[gameState.currentQuestionIndex];
         if (selectedAnswer === question.answer) {
-            const reward = 15;
-            updateBudget(reward);
-            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
+            updateBudget(15);
+            showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت 15 نقطة.`);
             setTimeout(nextQuestion, 1500);
         } else {
             if (gameState.mode === 'grand_round') {
                 loseGame();
             } else {
-                const penalty = 25;
-                updateBudget(-penalty);
-                showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`);
+                updateBudget(-25);
+                showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم 25 نقطة.`);
                 setTimeout(nextQuestion, 3000);
             }
         }
@@ -416,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function nextQuestion() {
         gameState.currentQuestionIndex++;
-        setupQuestion(); // استدعاء setupQuestion سيتعامل مع نهاية اللعبة تلقائياً
+        setupQuestion();
     }
 
     function loseGame() {
@@ -437,22 +381,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalScore = gameState.budget;
         const stageReached = isWin ? gameState.questions.length : gameState.currentQuestionIndex;
         const totalStages = gameState.questions.length;
-        let efficiency = ((finalScore / 200) * 60) + ((stageReached / totalStages) * 40);
-        efficiency = Math.max(0, Math.min(100, efficiency)).toFixed(0);
-        if (efficiency > personalStats.bestPercentage) {
-            personalStats.bestPercentage = efficiency;
-        }
-        const currentHighestStage = parseInt(personalStats.highestStage.split(' ')[0]);
-        if (stageReached > currentHighestStage) {
-            personalStats.highestStage = `${stageReached} / ${totalStages}`;
-        }
-        personalStats.recentHistory.push({
-            percentage: efficiency,
-            stage: `${stageReached} / ${totalStages}`
-        });
-        if (personalStats.recentHistory.length > 5) {
-            personalStats.recentHistory.shift();
-        }
+        let efficiency = Math.max(0, Math.min(100, ((finalScore / 200) * 60) + ((stageReached / totalStages) * 40))).toFixed(0);
+        if (efficiency > personalStats.bestPercentage) personalStats.bestPercentage = efficiency;
+        if (stageReached > parseInt(personalStats.highestStage.split(' ')[0])) personalStats.highestStage = `${stageReached} / ${totalStages}`;
+        personalStats.recentHistory.push({ percentage: efficiency, stage: `${stageReached} / ${totalStages}` });
+        if (personalStats.recentHistory.length > 5) personalStats.recentHistory.shift();
         saveStats();
         if (isWin) {
             document.getElementById('final-score').textContent = finalScore;
@@ -465,51 +398,42 @@ document.addEventListener('DOMContentLoaded', () => {
         buttons.startGame.onclick = () => showScreen('modeSelection');
         buttons.trainingMode.onclick = setupSpecialtySelection;
         buttons.grandRound.onclick = () => {
-            showModal(
-                '<h3>🏆 قواعد الجولة الكبرى</h3>',
-                `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p>
-                <ul>
-                    <li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li>
-                    <li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li>
-                    <li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li>
-                    <li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
-                </ul>
-                <p><b>هل أنت مستعد؟</b></p>`,
-                true,
-                startGrandRound
-            );
+            showModal('<h3>🏆 قواعد الجولة الكبرى</h3>', `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ.</p><ul><li><b>الهدف:</b> حل 15 حالة سريرية (5 سهل، 5 متوسط، 5 صعب).</li><li><b>الميزانية:</b> تبدأ بـ <b>200 نقطة</b>.</li><li><b>الوقت:</b> لديك <b>15 دقيقة</b> فقط.</li><li><b>القاعدة الأهم:</b> <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li></ul><p><b>هل أنت مستعد؟</b></p>`, true, startGrandRound);
         };
         buttons.skipQuestion.onclick = skipQuestion;
         buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
         buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
         
-        // ✅ ربط الأحداث للأزرار الجديدة الخاصة بالإحصائيات
         showStatsButton.onclick = showStatistics;
-        statsBackButton.onclick = () => showScreen('modeSelection');
+        statsBackButton.onclick = () => showScreen('modeSelection'); // ✨ هذا الزر الآن يعمل بشكل صحيح مع سجل المتصفح
 
         document.querySelectorAll('.tool-item:not(.skip-btn)').forEach(tool => {
-            if (tool.dataset.tool === 'consultation') {
-                tool.onclick = () => useAssistTool(tool);
-            } else {
-                tool.onclick = () => useTool(tool);
-            }
+            tool.onclick = tool.dataset.tool === 'consultation' ? () => useAssistTool(tool) : () => useTool(tool);
         });
         
         modal.closeBtn.onclick = () => modal.element.style.display = 'none';
-        window.onclick = (event) => {
-            if (event.target == modal.element) {
-                modal.element.style.display = 'none';
-            }
-        };
+        window.onclick = (event) => { if (event.target == modal.element) modal.element.style.display = 'none'; };
+    }
+
+    // =================================================================================
+    // ✨ تم تحديث منطق بدء التشغيل للتعامل مع الروابط المباشرة (Deep linking)
+    // =================================================================================
+    function initializeApp() {
+        // تحقق مما إذا كان هناك هاش في الرابط عند تحميل الصفحة
+        const initialScreen = location.hash ? location.hash.substring(1) : 'start';
+        
+        // تأكد من أن الشاشة الموجودة في الرابط صالحة قبل عرضها
+        if (Object.keys(screens).includes(initialScreen) || initialScreen === 'statistics') {
+            showScreen(initialScreen, true); // اعرض الشاشة دون إنشاء سجل جديد
+        } else {
+            showScreen('start', true); // إذا كان الرابط غير صالح، اذهب للشاشة الرئيسية
+        }
+        
+        // قم بإعداد جميع مستمعي الأحداث
+        setupEventListeners();
     }
 
     // --- بدء تشغيل التطبيق ---
-    const initialScreen = location.hash ? location.hash.substring(1) : 'start';
-    if (screens[initialScreen]) {
-        showScreen(initialScreen, true);
-    } else {
-        showScreen('start', true);
-    }
-    setupEventListeners();
+    initializeApp();
 
 }); // نهاية مستمع `DOMContentLoaded`
