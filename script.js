@@ -1,3 +1,115 @@
+const trainingBank = {
+    'قلبية': [
+        {
+            level: 'easy',
+            case: 'شابة 25 عاماً، تشكو من ألم صدري حاد وطاعن يزداد بالشهيق العميق والانحناء للأمام، ويخف بالجلوس. لديها قصة إصابة فيروسية في الجهاز التنفسي العلوي الأسبوع الماضي.',
+            tools: {
+                tahmeel: 'لا يوجد ارتفاع في إنزيمات القلب.',
+                takhṭīṭ_qalb: 'ارتفاع منتشر لوصلة ST مع تقعر للأعلى، مع انخفاض في وصلة PR.',
+                tasammu: 'صوت احتكاك تاموري ثلاثي الأطوار عند حافة القص اليسرى.'
+            },
+            choices: ['التهاب التامور الحاد', 'احتشاء عضلة قلبية', 'صمة رئوية', 'قلس معدي مريئي'],
+            answer: 'التهاب التامور الحاد'
+        },
+        {
+            level: 'medium',
+            case: 'رجل 68 عاماً، مدخن، لديه قصة ارتفاع ضغط، أتى بألم صدري شديد "كالتمزيق" بدأ فجأة وينتشر إلى الظهر بين لوحي الكتف.',
+            tools: {
+                tahmeel: 'D-dimer مرتفع.',
+                takhṭīṭ_qalb: 'طبيعي، لا يظهر علامات احتشاء.',
+                taammul: 'الضغط الشرياني في الذراع اليمنى (190/110) أعلى بكثير من اليسرى (120/80).',
+                jass: 'النبض في الشريان الفخذي الأيمن أضعف من الأيسر.'
+            },
+            choices: ['تسلخ الأبهر', 'احتشاء عضلة قلبية حاد', 'صمة رئوية ضخمة', 'انثقاب المريء'],
+            answer: 'تسلخ الأبهر'
+        },
+        {
+            level: 'hard',
+            case: 'مريضة 75 عاماً، لديها قصة رجفان أذيني، تشكو من خفقان وزلة تنفسية مع دوخة. الفحص يظهر تسرعاً شديداً في نبضات القلب بشكل غير منتظم.',
+            tools: {
+                tahmeel: 'BNP مرتفع قليلاً، وظائف الكلية طبيعية.',
+                takhṭīṭ_qalb: 'رجفان أذيني مع استجابة بطينية سريعة جداً (حوالي 170 نبضة/دقيقة)، مع غياب موجات P ووجود موجات f.',
+                tasammu: 'صوت أول متغير الشدة (S1)، مع أصوات قلب غير منتظمة وسريعة.',
+                jass: 'نبض غير منتظم بشكل واضح (irregularly irregular) مع عجز في النبض (فرق بين النبض المركزي والمحيطي).'
+            },
+            choices: ['رجفان أذيني مع استجابة بطينية سريعة (AF with RVR)', 'رفرفة أذينية', 'تسرع قلب بطيني', 'تسرع قلب فوق بطيني انتيابي'],
+            answer: 'رجفان أذيني مع استجابة بطينية سريعة (AF with RVR)'
+        }
+    ],
+    'صدرية': [
+        {
+            level: 'easy',
+            case: 'شاب 22 عاماً، طويل ونحيل، شعر فجأة بألم حاد في الجهة اليمنى من الصدر مع صعوبة في التنفس، بدون قصة رض أو سعال.',
+            tools: {
+                tasammu: 'غياب الأصوات التنفسية في قمة الرئة اليمنى.',
+                qar: 'فرط رنين عند قرع الصدر في الجهة اليمنى.',
+                taammul: 'حركة الجانب الأيمن من الصدر أقل من الأيسر.'
+            },
+            choices: ['ريح صدرية عفوية أولية', 'ذات رئة', 'نوبة ربو', 'صمة رئوية'],
+            answer: 'ريح صدرية عفوية أولية'
+        },
+        {
+            level: 'medium',
+            case: 'مريض 65 عاماً، مدخن شره، يعاني من سعال مزمن منتج للقشع معظم أيام السنة، وأتى اليوم بزيادة في كمية القشع وتغير لونه للأصفر مع تفاقم الزلة التنفسية.',
+            tools: {
+                tahmeel: 'ارتفاع طفيف في الكريات البيض، غازات الدم تظهر نقص أكسجة.',
+                tasammu: 'وزيز منتشر في الساحتين الرئويتين مع خراخر.',
+                taammul: 'استخدام العضلات التنفسية المساعدة وزرقة مركزية خفيفة.'
+            },
+            choices: ['هجمة حادة لداء الانسداد الرئوي المزمن (AECOPD)', 'ذات رئة مكتسبة بالمجتمع', 'قصور قلب احتقاني', 'سرطان رئة'],
+            answer: 'هجمة حادة لداء الانسداد الرئوي المزمن (AECOPD)'
+        },
+        {
+            level: 'hard',
+            case: 'مريضة 40 عاماً، غير مدخنة، تشكو من سعال جاف وزلة تنفسية مترقية على مدى أشهر، مع تعب وفقدان وزن. لا يوجد حمى.',
+            tools: {
+                tahmeel: 'طبيعية، لا يوجد علامات التهاب حاد.',
+                tasammu: 'خراخر كريبية (تشبه صوت الفيلكرو) في قواعد الرئتين.',
+                jass: 'يوجد تعجر في الأصابع (clubbing).',
+                taammul: 'تنفس سطحي وسريع.'
+            },
+            choices: ['تليف رئوي مجهول السبب (IPF)', 'ساركويد', 'ذات رئة خلالية', 'قصور قلب'],
+            answer: 'تليف رئوي مجهول السبب (IPF)'
+        }
+    ],
+    'هضمية': [
+        {
+            level: 'easy',
+            case: 'رجل 45 عاماً، يعاني من سمنة، يشكو من ألم حاد ومغصي في الربع العلوي الأيمن من البطن بعد تناول وجبة دسمة، مع غثيان.',
+            tools: {
+                jass: 'إيلام عند جس الربع العلوي الأيمن، مع علامة مورفي سلبية (لا يتوقف التنفس).',
+                taammul: 'لا يوجد يرقان.',
+                tahmeel: 'إنزيمات الكبد طبيعية.'
+            },
+            choices: ['مغص مراري', 'التهاب مرارة حاد', 'قرحة هضمية', 'التهاب بنكرياس'],
+            answer: 'مغص مراري'
+        },
+        {
+            level: 'medium',
+            case: 'شاب 20 عاماً، يشكو منذ أشهر من إسهال دموي، ألم بطني تشنجي، وحاجة ملحة للتغوط (زحير)، مع فقدان وزن.',
+            tools: {
+                tahmeel: 'فقر دم بعوز الحديد، وارتفاع في علامات الالتهاب (CRP).',
+                jass: 'إيلام منتشر على مسار القولون.',
+                taammul: 'شحوب في الملتحمة.'
+            },
+            choices: ['التهاب القولون التقرحي (UC)', 'داء كرون', 'متلازمة القولون المتهيج (IBS)', 'عدوى معوية'],
+            answer: 'التهاب القولون التقرحي (UC)'
+        },
+        {
+            level: 'hard',
+            case: 'مريض 55 عاماً، لديه قصة تشمع كبد كحولي، أُحضر إلى الإسعاف بسبب تغيم وعي وسلوك غريب. تفوح من نفسه رائحة عفنة (fetor hepaticus).',
+            tools: {
+                tahmeel: 'ارتفاع الأمونيا في الدم، مع اضطراب في شوارد الصوديوم.',
+                munakkisat: 'وجود "الرفة الخافقة" (flapping tremor) عند بسط اليدين.',
+                taammul: 'يرقان واضح في العينين والجلد، مع وجود حبن (ascites) في البطن.',
+                jass: 'لا يمكن تقييم البطن جيداً بسبب الحبن.'
+            },
+            choices: ['اعتلال دماغي كبدي', 'نزف دماغي', 'نقص سكر الدم', 'سبات فرط حلولية'],
+            answer: 'اعتلال دماغي كبدي'
+        }
+    ]
+};
+
 const challengeBank = {
     // -- الحالات الأساسية (أول 15 حالة تظهر في أول محاولة) --
     core: {
@@ -362,6 +474,9 @@ reserve: {
 // =================================================================================
 //                                 القسم الأول: كل المتغيرات
 // =================================================================================
+// =================================================================================
+//                                 القسم الأول: كل المتغيرات
+// =================================================================================
 
 // ⚠️ تذكير: يجب لصق متغيرات `trainingBank` و `challengeBank` الجديدة هنا
 
@@ -380,7 +495,7 @@ const buttons = {
     startGame: document.getElementById('start-game-btn'),
     trainingMode: document.getElementById('training-mode-btn'),
     grandRound: document.getElementById('grand-round-btn'),
-    skipQuestion: document.getElementById('skip-question-btn'), // تم تغيير الزر
+    skipQuestion: document.getElementById('skip-question-btn'),
     restartGrandRound: document.getElementById('restart-grand-round-btn'),
     backToMainMenuLose: document.getElementById('back-to-main-menu-lose'),
     backToMainMenuWin: document.getElementById('back-to-main-menu-win'),
@@ -418,26 +533,59 @@ let personalStats = JSON.parse(localStorage.getItem('personalStats')) || {
     totalAttempts: 0,
     highestStage: '0 / 15',
     recentHistory: [],
-    isFirstAttempt: true, // متغير جديد لتتبع أول محاولة
+    isFirstAttempt: true,
 };
 let timerInterval;
+let currentScreenName = 'start'; // متغير لتتبع الشاشة الحالية
 
 // =================================================================================
 //                                 القسم الثاني: كل الدوال
 // =================================================================================
 
-// --- وظائف التحكم بالواجهة ---
-function showScreen(screenName) {
+// --- وظائف التحكم بالواجهة (مع دعم زر الرجوع) ---
+function showScreen(screenName, isPoppingState = false) {
     Object.values(screens).forEach(screen => screen.classList.remove('active'));
     screens[screenName].classList.add('active');
+    currentScreenName = screenName; // تحديث الشاشة الحالية
+
+    // **الإصلاح: استخدام History API**
+    if (!isPoppingState) {
+        // لا تدفع الحالة إذا كانت هي نفسها لمنع التكرار في السجل
+        if (history.state?.screen !== screenName) {
+            history.pushState({ screen: screenName }, `Screen ${screenName}`, `#${screenName}`);
+        }
+    }
 }
 
-function showModal(title, text, showConfirm = false, onConfirm = null) {
+// **الإصلاح: معالج حدث الرجوع في المتصفح**
+window.onpopstate = function(event) {
+    if (currentScreenName === 'game') {
+        // منع الرجوع المباشر من شاشة اللعب
+        history.forward(); // العودة خطوة للأمام لإبقاء المستخدم في نفس الصفحة
+        showModal(
+            'تأكيد الخروج',
+            'هل أنت متأكد من رغبتك في مغادرة اللعبة؟ سيتم فقدان تقدمك الحالي.',
+            true,
+            () => {
+                clearInterval(timerInterval); // إيقاف العداد
+                showScreen('modeSelection'); // الخروج إلى القائمة الرئيسية
+            }
+        );
+    } else if (event.state && event.state.screen) {
+        showScreen(event.state.screen, true);
+    } else {
+        // إذا وصل المستخدم إلى بداية السجل، اعرض الشاشة الأولى
+        showScreen('start', true);
+    }
+};
+
+
+function showModal(title, text, showConfirmButtons = false, onConfirm = null) {
     modal.title.innerHTML = title;
     modal.text.innerHTML = text;
     modal.element.style.display = 'flex';
 
-    if (showConfirm) {
+    if (showConfirmButtons) {
         modal.confirmBtn.style.display = 'inline-block';
         modal.cancelBtn.style.display = 'inline-block';
         modal.confirmBtn.onclick = () => {
@@ -495,24 +643,20 @@ function startTrainingMode(specialty) {
 }
 
 function startGrandRound() {
-    // زيادة عداد المحاولات وحفظه
     if (personalStats.isFirstAttempt) {
-        personalStats.isFirstAttempt = false; // لم تعد المحاولة الأولى
+        personalStats.isFirstAttempt = false;
     }
     personalStats.totalAttempts++;
     saveStats();
 
     let questions;
-    // تحديد الأسئلة بناءً على ما إذا كانت هذه هي المحاولة الأولى
     if (personalStats.totalAttempts === 1) {
-        // المحاولة الأولى: استخدم الأسئلة الأساسية بالترتيب
         questions = [
             ...challengeBank.core.easy,
             ...challengeBank.core.medium,
             ...challengeBank.core.hard
         ];
     } else {
-        // المحاولات اللاحقة: اسحب عشوائياً من البنك الاحتياطي
         const easyQuestions = shuffleArray([...challengeBank.reserve.easy]).slice(0, 5);
         const mediumQuestions = shuffleArray([...challengeBank.reserve.medium]).slice(0, 5);
         const hardQuestions = shuffleArray([...challengeBank.reserve.hard]).slice(0, 5);
@@ -540,6 +684,7 @@ function setupSpecialtySelection() {
         button.onclick = () => startTrainingMode(specialty);
         grid.appendChild(button);
     });
+    showScreen('specialtySelection');
 }
 
 function startTimer(duration, display) {
@@ -548,12 +693,9 @@ function startTimer(duration, display) {
     timerInterval = setInterval(() => {
         minutes = parseInt(timer / 60, 10);
         seconds = parseInt(timer % 60, 10);
-
         minutes = minutes < 10 ? "0" + minutes : minutes;
         seconds = seconds < 10 ? "0" + seconds : seconds;
-
         display.textContent = minutes + ":" + seconds;
-
         if (--timer < 0) {
             clearInterval(timerInterval);
             loseGame();
@@ -563,20 +705,17 @@ function startTimer(duration, display) {
 
 // --- وظائف منطق اللعبة الفعلي ---
 function setupQuestion() {
-    // إعادة تعيين الواجهة
     gameElements.patientFileContent.innerHTML = '<p class="placeholder">استخدم الأدوات لكشف المعلومات وإضافتها إلى الملف...</p>';
     document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('used'));
     
     const question = gameState.questions[gameState.currentQuestionIndex];
     
-    // تحديث العرض
     gameElements.budgetDisplay.textContent = gameState.budget;
     gameElements.questionCounter.textContent = `${gameState.currentQuestionIndex + 1} / ${gameState.questions.length}`;
     gameElements.caseTitle.textContent = `الحالة رقم #${gameState.currentQuestionIndex + 1} (صعوبة: ${question.level})`;
     gameElements.caseDescription.textContent = question.case;
 
-    // **التعديل الأهم: إظهار الخيارات مباشرة**
-    gameElements.choicesContainer.innerHTML = ''; // إفراغ الحاوية
+    gameElements.choicesContainer.innerHTML = '';
     const shuffledChoices = shuffleArray([...question.choices]);
     shuffledChoices.forEach(choice => {
         const button = document.createElement('button');
@@ -589,23 +728,18 @@ function setupQuestion() {
 
 function useTool(toolElement) {
     if (toolElement.classList.contains('used')) return;
-    
     const toolName = toolElement.dataset.tool;
     const costElement = toolElement.querySelector('.tool-cost');
-    if (!costElement) return; // تأكد من وجود عنصر التكلفة
-    
+    if (!costElement) return;
     const cost = parseInt(costElement.textContent);
-
     if (gameState.budget < cost) {
         showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
         return;
     }
     updateBudget(-cost);
     toolElement.classList.add('used');
-    
     const question = gameState.questions[gameState.currentQuestionIndex];
     const info = question.tools[toolName];
-    
     if (info) {
         addInfoToPatientFile(info, toolElement.querySelector('.tool-name').textContent);
     } else {
@@ -615,17 +749,14 @@ function useTool(toolElement) {
 
 function useAssistTool(toolElement) {
     if (toolElement.classList.contains('used')) return;
-
     const toolName = toolElement.dataset.tool;
     const cost = parseInt(toolElement.querySelector('.tool-cost').textContent);
-
     if (gameState.budget < cost) {
         showModal('ميزانية غير كافية!', 'لا يمكنك استخدام هذه الأداة.');
         return;
     }
     updateBudget(-cost);
     toolElement.classList.add('used');
-    
     const question = gameState.questions[gameState.currentQuestionIndex];
     if (toolName === 'consultation') {
         let wrongChoices = question.choices.filter(c => c !== question.answer);
@@ -640,19 +771,18 @@ function useAssistTool(toolElement) {
 }
 
 function skipQuestion() {
-    const penalty = 30; // عقوبة تخطي السؤال
+    const penalty = 30;
     if (gameState.budget < penalty) {
         showModal('لا يمكن التخطي!', `أنت بحاجة إلى ${penalty} نقطة على الأقل لتخطي السؤال.`);
         return;
     }
-    
     showModal(
         'تأكيد التخطي',
         `هل أنت متأكد من رغبتك في تخطي هذا السؤال؟ سيتم خصم <b>${penalty} نقطة</b> من ميزانيتك.`,
         true,
         () => {
             updateBudget(-penalty);
-            showModal('تم التخطي!', 'لقد تخطيت السؤال الحالي.', false);
+            showModal('تم التخطي!', 'لقد تخطيت السؤال الحالي.');
             setTimeout(nextQuestion, 1500);
         }
     );
@@ -678,15 +808,15 @@ function checkAnswer(selectedAnswer) {
     if (selectedAnswer === question.answer) {
         const reward = 15;
         updateBudget(reward);
-        showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`, false);
+        showModal('إجابة صحيحة!', `تشخيصك صحيح! لقد ربحت ${reward} نقطة.`);
         setTimeout(nextQuestion, 1500);
     } else {
         if (gameState.mode === 'grand_round') {
-            loseGame(); // تم تعديلها لتعرض الرسالة الافتراضية
+            loseGame();
         } else {
             const penalty = 25;
             updateBudget(-penalty);
-            showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`, false);
+            showModal('إجابة خاطئة!', `التشخيص الصحيح كان: <b>${question.answer}</b>. تم خصم ${penalty} نقطة.`);
             setTimeout(nextQuestion, 3000);
         }
     }
@@ -709,7 +839,6 @@ function nextQuestion() {
 function loseGame() {
     clearInterval(timerInterval);
     updateStatsOnFinish(false);
-    // **التعديل: استخدام الرسالة التفاعلية المطلوبة**
     document.getElementById('lose-reason').innerHTML = "لقد خسرت وخسر المريض حياته. شكراً لجهودك المبذولة &#128513;<br>حاول مرة أخرى أو ارجع إلى القائمة الرئيسية.";
     showScreen('lose');
 }
@@ -754,27 +883,32 @@ function updateStatsOnFinish(isWin) {
 
 function setupEventListeners() {
     buttons.startGame.onclick = () => showScreen('modeSelection');
-    buttons.trainingMode.onclick = () => {
-        setupSpecialtySelection();
-        showScreen('specialtySelection');
-    };
+    
+    // **الإصلاح: إعادة تفعيل زر التدريب**
+    buttons.trainingMode.onclick = setupSpecialtySelection;
+
     buttons.grandRound.onclick = () => {
+        // **الإصلاح: استعادة النافذة التفصيلية**
         showModal(
-            '🏆 قواعد الجولة الكبرى',
-            `<p>مرحباً بك في التحدي الأسمى! هدفك هو حل 15 حالة متتالية.</p>
+            '<h3>🏆 قواعد الجولة الكبرى: دليل المشخص المحترف</h3>',
+            `<p>مرحباً بك في التحدي الأسمى! هنا، لا مجال للخطأ. هدفك هو إثبات أنك تملك المعرفة والحدس السريري لتجاوز 15 حالة متتالية.</p>
             <ul>
-                <li><b>سياسة الخطأ الواحد:</b> أي إجابة خاطئة تنهي الجولة فوراً!</li>
-                <li><b>الميزانية والوقت:</b> تبدأ بـ 200 نقطة و 15 دقيقة.</li>
+                <li><b>🧠 الهدف الأساسي:</b> حل 15 حالة سريرية يتم اختيارها عشوائياً، وتتدرج في الصعوبة.</li>
+                <li><b>💰 الميزانية الأولية:</b> تبدأ رحلتك بـ <b>200 نقطة</b>. إدارتها بحكمة هي مفتاح النجاح.</li>
+                <li><b>⏳ عداد الوقت:</b> لديك <b>15 دقيقة فقط</b> لإكمال الجولة. إذا انتهى الوقت، تنتهي الجولة.</li>
+                <li><b>❌ سياسة الخطأ الواحد:</b> هذه هي القاعدة الأهم: <b>أي إجابة خاطئة تنهي الجولة فوراً!</b></li>
             </ul>
             <p><b>هل أنت مستعد لإثبات جدارتك؟</b></p>`,
             true,
-            startGrandRound // استدعاء الدالة عند التأكيد
+            startGrandRound
         );
     };
     buttons.skipQuestion.onclick = skipQuestion;
-    buttons.restartGrandRound.onclick = () => showScreen('modeSelection'); // العودة للقائمة لاختيار التحدي مجدداً
+    buttons.restartGrandRound.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuLose.onclick = () => showScreen('modeSelection');
     buttons.backToMainMenuWin.onclick = () => showScreen('modeSelection');
+    
+    // **الإصلاح: إعادة تفعيل زر الإحصائيات**
     buttons.showStats.onclick = displayStats;
     buttons.backToMainMenuStats.onclick = () => showScreen('modeSelection');
 
@@ -796,7 +930,9 @@ function setupEventListeners() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    showScreen('start');
+    // التعامل مع تحميل الصفحة لأول مرة أو عند التحديث
+    const initialScreen = location.hash ? location.hash.substring(1) : 'start';
+    showScreen(initialScreen, true); // true لمنع دفع حالة جديدة للسجل
     setupEventListeners();
 });
-    
+                
